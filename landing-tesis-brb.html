@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Tesis BRB — IA para Investigación Académica</title>
+<meta name="description" content="Generá tu tesis o trabajo de investigación con inteligencia artificial. Herramienta BRB para estudiantes universitarios, terciarios y de posgrado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#1B3A6B; --navy-deep:#0F2244; --navy-mid:#254d8c; --navy-cl:rgba(27,58,107,.15);
+  --oro:#C8A84B; --oro-cl:#e2c97a; --oro-dim:#8a7233; --oro-bg:rgba(200,168,75,.08);
+  --crema:#F7F4EF; --crema-dark:#ede8df;
+  --negro:#0A0A0A; --gris:#1a1a1a; --gris-mid:#2a2a2a; --gris-cl:#888;
+  --error:#c0392b; --success:#1a7a4a;
+  --fd:'Cormorant Garamond',Georgia,serif;
+  --fm:'IBM Plex Mono','Courier New',monospace;
+  --fb:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:var(--negro);color:var(--crema);font-family:var(--fb);overflow-x:hidden;}
+
+/* GRAIN */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 5%;background:rgba(10,10,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,168,75,.12);display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-brand{font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--oro);letter-spacing:.05em;text-decoration:none;}
+.nav-brand span{color:var(--crema);font-weight:300;font-style:italic;font-size:1rem;}
+.nav-links{display:flex;align-items:center;gap:2rem;}
+.nav-links a{font-family:var(--fm);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris-cl);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--oro);}
+.nav-cta{background:var(--oro);color:var(--negro)!important;padding:.5rem 1.2rem;font-weight:600!important;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--oro-cl)!important;}
+
+/* BUTTONS */
+.btn-p{background:var(--oro);color:var(--negro);border:none;font-family:var(--fb);font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:16px 36px;cursor:pointer;transition:background .2s,transform .15s;text-decoration:none;display:inline-flex;align-items:center;gap:10px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));}
+.btn-p:hover{background:var(--oro-cl);transform:translateY(-2px);}
+.btn-s{background:transparent;color:var(--crema);border:1px solid rgba(245,240,232,.25);font-family:var(--fb);font-size:.85rem;font-weight:500;padding:15px 30px;cursor:pointer;transition:border-color .2s,color .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-s:hover{border-color:var(--oro);color:var(--oro);}
+
+/* SECTION BASE */
+section{padding:100px 5%;}
+.sec-inner{max-width:1200px;margin:0 auto;}
+.sec-tag{font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);margin-bottom:1rem;}
+.sec-h2{font-family:var(--fd);font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.15;margin-bottom:1.5rem;}
+.sec-h2 em{color:var(--oro);font-style:italic;}
+.sec-p{color:var(--gris-cl);font-size:1rem;line-height:1.75;max-width:640px;}
+
+/* ── HERO ── */
+#hero{padding-top:140px;padding-bottom:100px;position:relative;overflow:hidden;}
+#hero::before{content:'';position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(27,58,107,.25) 0%,transparent 70%);pointer-events:none;}
+#hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(200,168,75,.06) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.hero-tag{font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;}
+.hero-tag::before{content:'';display:block;width:32px;height:1px;background:var(--oro-dim);}
+.hero-h1{font-family:var(--fd);font-size:clamp(2.5rem,5vw,4rem);font-weight:300;line-height:1.08;margin-bottom:1.5rem;}
+.hero-h1 em{color:var(--oro);font-style:italic;}
+.hero-h1 strong{font-weight:700;}
+.hero-desc{color:var(--gris-cl);font-size:1.05rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;}
+.hero-stats{display:flex;gap:2rem;margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(200,168,75,.12);}
+.stat{display:flex;flex-direction:column;gap:.25rem;}
+.stat-num{font-family:var(--fd);font-size:2rem;font-weight:600;color:var(--oro);}
+.stat-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gris-cl);}
+.hero-visual{position:relative;}
+.hero-mockup{background:#0d0d0d;border:1px solid rgba(200,168,75,.2);box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 1px rgba(200,168,75,.05);overflow:hidden;}
+.mockup-bar{background:#080808;border-bottom:1px solid #1a1a1a;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;}
+.mockup-dots{display:flex;gap:.4rem;}
+.mockup-dot{width:8px;height:8px;border-radius:50%;}
+.mockup-dot:nth-child(1){background:#c0392b;}
+.mockup-dot:nth-child(2){background:#f39c12;}
+.mockup-dot:nth-child(3){background:var(--success);}
+.mockup-url{font-family:var(--fm);font-size:.6rem;color:#444;flex:1;text-align:center;}
+.mockup-body{padding:1.2rem;display:flex;flex-direction:column;gap:.6rem;}
+.mockup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;}
+.mockup-title{font-family:var(--fd);font-size:.95rem;font-style:italic;color:var(--crema);}
+.mockup-badge{font-family:var(--fm);font-size:.55rem;background:rgba(200,168,75,.1);border:1px solid var(--oro-dim);color:var(--oro);padding:.2rem .5rem;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.mockup-idx{display:flex;flex-direction:column;gap:.3rem;}
+.mockup-idx-item{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-bottom:1px solid #111;}
+.mockup-idx-num{font-family:var(--fm);font-size:.55rem;color:var(--oro-dim);min-width:20px;}
+.mockup-idx-name{font-size:.72rem;color:#aaa;flex:1;}
+.mockup-idx-item.gen .mockup-idx-name{color:var(--crema);}
+.mockup-idx-ok{font-size:.6rem;color:var(--success);}
+.mockup-progress{height:3px;background:#111;overflow:hidden;margin-top:.8rem;}
+.mockup-prog-fill{height:100%;background:linear-gradient(90deg,var(--navy-mid),var(--oro));width:65%;animation:progAnim 3s ease-in-out infinite alternate;}
+@keyframes progAnim{from{width:45%}to{width:85%}}
+.floating-badge{position:absolute;bottom:-20px;left:-20px;background:var(--negro);border:1px solid rgba(200,168,75,.3);padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 20px 40px rgba(0,0,0,.4);}
+.fb-icon{font-size:1.5rem;}
+.fb-text{display:flex;flex-direction:column;gap:.1rem;}
+.fb-main{font-family:var(--fm);font-size:.65rem;color:var(--oro);}
+.fb-sub{font-family:var(--fm);font-size:.55rem;color:var(--gris-cl);}
+
+/* ── FEATURES ── */
+#features{background:var(--negro);border-top:1px solid #111;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem;}
+.feat-card{background:#0a0a0a;border:1px solid #1a1a1a;border-top:2px solid transparent;padding:2rem;transition:border-color .3s,transform .2s;}
+.feat-card:hover{border-top-color:var(--oro);transform:translateY(-4px);}
+.feat-icon{font-size:2rem;margin-bottom:1.25rem;}
+.feat-title{font-family:var(--fd);font-size:1.4rem;font-weight:600;color:var(--crema);margin-bottom:.75rem;}
+.feat-desc{font-size:.875rem;color:var(--gris-cl);line-height:1.7;}
+.feat-tag{display:inline-block;margin-top:1rem;font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;padding:.25rem .6rem;background:var(--oro-bg);border:1px solid rgba(200,168,75,.2);color:var(--oro);clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+
+/* ── DEMO ── */
+#demo{background:#060606;border-top:1px solid #111;border-bottom:1px solid #111;}
+.demo-interface{margin-top:3rem;background:#0a0a0a;border:1px solid rgba(200,168,75,.2);box-shadow:0 40px 80px rgba(0,0,0,.5);}
+.demo-tabs{display:flex;background:#080808;border-bottom:1px solid rgba(200,168,75,.1);}
+.demo-tab{font-family:var(--fm);font-size:.62rem;padding:14px 22px;cursor:pointer;border-right:1px solid rgba(255,255,255,.05);color:var(--gris-cl);letter-spacing:.12em;text-transform:uppercase;transition:all .2s;border-bottom:2px solid transparent;}
+.demo-tab.on{color:var(--oro);background:rgba(200,168,75,.06);border-bottom-color:var(--oro);}
+.demo-tab:hover:not(.on){color:var(--crema);background:rgba(255,255,255,.03);}
+.demo-panel{display:none;padding:2.5rem;}
+.demo-panel.on{display:block;}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+.sim-left{display:flex;flex-direction:column;gap:1rem;}
+.sim-title{font-family:var(--fd);font-size:1.1rem;font-style:italic;color:var(--crema);margin-bottom:.5rem;}
+.sim-campo{display:flex;flex-direction:column;gap:.4rem;}
+.sim-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--oro-dim);}
+.sim-select,.sim-input{background:#111;border:1px solid #2a2a2a;color:var(--crema);padding:.65rem .85rem;font-family:var(--fb);font-size:.85rem;outline:none;transition:border-color .2s;width:100%;}
+.sim-select:focus,.sim-input:focus{border-color:var(--oro-dim);}
+.sim-select option{background:#111;}
+.sim-ta{background:#111;border:1px solid #2a2a2a;color:var(--crema);padding:.65rem .85rem;font-family:var(--fb);font-size:.85rem;outline:none;resize:none;width:100%;min-height:70px;line-height:1.5;transition:border-color .2s;}
+.sim-ta:focus{border-color:var(--oro-dim);}
+.sim-btn-gen{background:var(--oro);color:var(--negro);border:none;font-family:var(--fb);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:14px 24px;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:8px;margin-top:.5rem;width:100%;justify-content:center;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+.sim-btn-gen:hover{background:var(--oro-cl);}
+.sim-btn-gen:disabled{opacity:.5;cursor:wait;}
+.sim-right{display:flex;flex-direction:column;}
+.sim-out-hdr{padding:.75rem 1rem;background:#080808;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center;}
+.sim-out-tit{font-family:var(--fm);font-size:.6rem;letter-spacing:.15em;color:var(--oro);}
+.sim-out-body{flex:1;padding:1.25rem;font-family:var(--fm);font-size:.75rem;line-height:1.8;color:#aaa;min-height:320px;white-space:pre-wrap;background:#080808;border:1px solid #111;overflow-y:auto;}
+.sim-aviso{font-family:var(--fm);font-size:.58rem;color:var(--error);padding:.6rem .85rem;background:rgba(192,57,43,.08);border-top:1px solid rgba(192,57,43,.2);letter-spacing:.05em;}
+
+/* ── HOW IT WORKS ── */
+#como{background:var(--negro);}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:4rem;position:relative;}
+.steps-grid::before{content:'';position:absolute;top:32px;left:calc(12.5% + 32px);right:calc(12.5% + 32px);height:1px;background:linear-gradient(90deg,transparent,var(--oro-dim),transparent);z-index:0;}
+.step-card{position:relative;z-index:1;text-align:center;}
+.step-num-wrap{width:64px;height:64px;margin:0 auto 1.5rem;background:var(--negro);border:1px solid var(--oro-dim);display:flex;align-items:center;justify-content:center;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);}
+.step-num{font-family:var(--fm);font-size:1.2rem;font-weight:500;color:var(--oro);}
+.step-title{font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem;}
+.step-desc{font-size:.8rem;color:var(--gris-cl);line-height:1.6;}
+
+/* ── TIPOS ── */
+#tipos{background:#060606;border-top:1px solid #111;}
+.tipos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:3rem;}
+.tipo-card{background:#0a0a0a;border:1px solid #1a1a1a;padding:1.5rem;display:flex;align-items:flex-start;gap:1rem;transition:border-color .2s;}
+.tipo-card:hover{border-color:var(--oro-dim);}
+.tipo-icon{font-size:1.8rem;flex-shrink:0;}
+.tipo-body{}
+.tipo-title{font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.25rem;}
+.tipo-desc{font-size:.8rem;color:var(--gris-cl);line-height:1.5;}
+.tipo-nivel{font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.5rem;letter-spacing:.08em;}
+
+/* ── PRECIOS ── */
+#precios{background:var(--negro);}
+.precio-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem;max-width:800px;margin-left:auto;margin-right:auto;}
+.precio-card{background:#0a0a0a;border:1px solid #1a1a1a;padding:2.5rem;}
+.precio-card.featured{border-color:var(--oro-dim);position:relative;}
+.precio-card.featured::before{content:'MÁS ELEGIDO';position:absolute;top:-1px;left:50%;transform:translateX(-50%);font-family:var(--fm);font-size:.55rem;letter-spacing:.15em;background:var(--oro);color:var(--negro);padding:.3rem 1rem;font-weight:600;}
+.precio-plan{font-family:var(--fm);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gris-cl);margin-bottom:1rem;}
+.precio-monto{font-family:var(--fd);font-size:3rem;font-weight:600;color:var(--crema);line-height:1;}
+.precio-monto sup{font-size:1.2rem;vertical-align:top;margin-top:.5rem;color:var(--oro);}
+.precio-periodo{font-family:var(--fm);font-size:.65rem;color:var(--gris-cl);margin-top:.25rem;margin-bottom:1.5rem;}
+.precio-features{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;}
+.precio-features li{font-size:.875rem;color:var(--crema-dark);display:flex;align-items:flex-start;gap:.6rem;line-height:1.4;}
+.precio-features li::before{content:'✓';color:var(--oro);font-weight:700;flex-shrink:0;margin-top:.05rem;}
+.precio-features li.no::before{content:'—';color:#333;}
+.precio-features li.no{color:#444;}
+
+/* ── AVISO ── */
+#aviso{background:#060606;border-top:1px solid #111;}
+.aviso-box{background:rgba(200,168,75,.04);border:1px solid rgba(200,168,75,.15);border-left:3px solid var(--oro);padding:2.5rem;max-width:860px;margin:0 auto;}
+.aviso-title{font-family:var(--fm);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--oro);margin-bottom:1rem;}
+.aviso-text{font-size:.9rem;color:var(--gris-cl);line-height:1.8;}
+.aviso-text strong{color:var(--crema);}
+
+/* ── CTA ── */
+#contacto{background:linear-gradient(135deg,var(--navy-deep) 0%,#0d1f3a 50%,var(--negro) 100%);text-align:center;padding:120px 5%;}
+.cta-tag{font-family:var(--fm);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);margin-bottom:1.5rem;}
+.cta-h2{font-family:var(--fd);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;line-height:1.15;margin-bottom:1.5rem;}
+.cta-h2 em{color:var(--oro);font-style:italic;}
+.cta-desc{color:var(--gris-cl);font-size:1rem;line-height:1.75;max-width:580px;margin:0 auto 3rem;}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.cta-info{margin-top:2.5rem;font-family:var(--fm);font-size:.62rem;letter-spacing:.1em;color:#333;}
+.cta-info a{color:var(--oro-dim);text-decoration:none;}
+
+/* ── FOOTER ── */
+footer{background:#060606;border-top:1px solid #111;padding:60px 5% 40px;}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:4rem;margin-bottom:3rem;}
+.footer-brand-name{font-family:var(--fd);font-size:1.4rem;font-weight:600;color:var(--crema);margin-bottom:.25rem;}
+.footer-orcid{font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);letter-spacing:.1em;margin-bottom:1rem;}
+.footer-txt{font-size:.8rem;color:var(--gris-cl);line-height:1.7;margin-bottom:1rem;}
+.footer-brands{display:flex;flex-direction:column;gap:.25rem;margin-top:.75rem;}
+.footer-brand-item{font-family:var(--fm);font-size:.58rem;color:rgba(200,168,75,.4);letter-spacing:.08em;}
+.footer-col-tit{font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oro);margin-bottom:1.25rem;}
+.footer-link{display:block;font-size:.8rem;color:var(--gris-cl);text-decoration:none;margin-bottom:.6rem;transition:color .2s;}
+.footer-link:hover{color:var(--oro);}
+.footer-eco-item{font-family:var(--fm);font-size:.65rem;color:#333;margin-bottom:.4rem;padding-left:.75rem;position:relative;}
+.footer-eco-item::before{content:'→';position:absolute;left:0;color:var(--oro-dim);}
+.footer-eco-item.current{color:var(--oro);}
+.footer-bottom{max-width:1200px;margin:0 auto;padding-top:2rem;border-top:1px solid #111;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-copy{font-family:var(--fm);font-size:.58rem;color:#2a2a2a;letter-spacing:.06em;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-visual{display:none;}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .steps-grid{grid-template-columns:1fr 1fr;}
+  .steps-grid::before{display:none;}
+  .tipos-grid{grid-template-columns:1fr 1fr;}
+  .precio-grid{grid-template-columns:1fr;}
+  .footer-inner{grid-template-columns:1fr;}
+  .sim-grid{grid-template-columns:1fr;}
+  nav .nav-links{display:none;}
+}
+@media(max-width:600px){
+  .features-grid,.tipos-grid,.steps-grid{grid-template-columns:1fr;}
+  section{padding:70px 5%;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand">BRB <span>Generador de Tesis</span></a>
+  <div class="nav-links">
+    <a href="#features">Características</a>
+    <a href="#demo">Demo</a>
+    <a href="#como">Cómo funciona</a>
+    <a href="#tipos">Tipos de trabajo</a>
+    <a href="#precios">Licencias</a>
+    <a href="#contacto" class="nav-cta">Solicitar acceso</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">BRB Estrategia &amp; Procesos · 6.ª herramienta del ecosistema</div>
+      <h1 class="hero-h1">Tu tesis<br><em>con inteligencia</em><br><strong>artificial</strong></h1>
+      <p class="hero-desc">Generá el índice, desarrollá cada sección y descargá tu trabajo de investigación completo. Compatible con todos los niveles educativos y estilos de cita académica.</p>
+      <div class="hero-btns">
+        <a href="#demo" class="btn-p">Ver demo interactivo →</a>
+        <a href="#contacto" class="btn-s">Solicitar licencia</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Tipos de trabajo</div></div>
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Áreas disciplinares</div></div>
+        <div class="stat"><div class="stat-num">5</div><div class="stat-label">Estilos de cita</div></div>
+        <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Texto plano exportable</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dots"><div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div></div>
+          <div class="mockup-url">bbbarrera1986-rgb.github.io/generador-tesis-brb</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-header">
+            <div class="mockup-title">Análisis microbiológico en langostino</div>
+            <div class="mockup-badge">65% ·  13/20 secciones</div>
+          </div>
+          <div class="mockup-idx">
+            <div class="mockup-idx-item gen"><div class="mockup-idx-num">1.</div><div class="mockup-idx-name">INTRODUCCIÓN</div><div class="mockup-idx-ok">✓</div></div>
+            <div class="mockup-idx-item gen"><div class="mockup-idx-num">2.</div><div class="mockup-idx-name">MARCO TEÓRICO</div><div class="mockup-idx-ok">✓</div></div>
+            <div class="mockup-idx-item gen"><div class="mockup-idx-num">2.1</div><div class="mockup-idx-name">Microbiología de productos del mar</div><div class="mockup-idx-ok">✓</div></div>
+            <div class="mockup-idx-item gen"><div class="mockup-idx-num">3.</div><div class="mockup-idx-name">METODOLOGÍA</div><div class="mockup-idx-ok">✓</div></div>
+            <div class="mockup-idx-item"><div class="mockup-idx-num">4.</div><div class="mockup-idx-name">RESULTADOS Y ANÁLISIS</div><div class="mockup-idx-ok"></div></div>
+            <div class="mockup-idx-item"><div class="mockup-idx-num">5.</div><div class="mockup-idx-name">CONCLUSIONES</div><div class="mockup-idx-ok"></div></div>
+          </div>
+          <div class="mockup-progress"><div class="mockup-prog-fill"></div></div>
+        </div>
+      </div>
+      <div class="floating-badge">
+        <div class="fb-icon">⚡</div>
+        <div class="fb-text">
+          <div class="fb-main">Gemini 2.5 Flash</div>
+          <div class="fb-sub">Tu API Key · Sin costos fijos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="sec-inner">
+    <div class="sec-tag">Características del sistema</div>
+    <h2 class="sec-h2">Todo lo que necesitás para<br><em>completar tu investigación</em></h2>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">📋</div>
+        <div class="feat-title">Índice inteligente</div>
+        <div class="feat-desc">Generá la estructura completa del trabajo en segundos. El índice es editable — podés agregar, quitar o reorganizar secciones antes de generar el contenido.</div>
+        <div class="feat-tag">Editable en tiempo real</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">✍️</div>
+        <div class="feat-title">Sección por sección</div>
+        <div class="feat-desc">Generá cada capítulo individualmente con un clic, o todo el trabajo de una sola vez. La IA mantiene coherencia entre secciones usando el contexto global del documento.</div>
+        <div class="feat-tag">Contexto persistente</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📎</div>
+        <div class="feat-title">Documento base</div>
+        <div class="feat-desc">Adjuntá un PDF o DOCX como referencia. La herramienta extrae el contenido y lo usa como base temática para generar secciones más precisas y contextualizadas.</div>
+        <div class="feat-tag">PDF · DOCX · hasta 15K chars</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📖</div>
+        <div class="feat-title">5 estilos de cita</div>
+        <div class="feat-desc">APA 7.ª edición, Vancouver, Chicago, ICONTEC y libre. El modelo aplica el formato de cita correcto en cada sección según el estilo elegido.</div>
+        <div class="feat-tag">APA · Vancouver · Chicago · ICONTEC</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💾</div>
+        <div class="feat-title">Guardado automático</div>
+        <div class="feat-desc">El trabajo se guarda en la nube cada vez que generás una sección. Si cerrás la herramienta, retomás exactamente donde lo dejaste al volver a ingresar.</div>
+        <div class="feat-tag">Supabase cloud · 1 dispositivo</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⬇️</div>
+        <div class="feat-title">Exportación .txt</div>
+        <div class="feat-desc">Descargá el trabajo completo en texto plano, sin Markdown, sin símbolos — listo para pegar en Word o Google Docs. Incluye encabezado con metadatos del trabajo.</div>
+        <div class="feat-tag">Texto plano · Sin Markdown</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO INTERACTIVO -->
+<section id="demo">
+  <div class="sec-inner">
+    <div class="sec-tag">Demo interactivo</div>
+    <h2 class="sec-h2">Probalo ahora mismo<br><em>con tu propia API Key</em></h2>
+    <p class="sec-p" style="margin-bottom:0">Usá tu key gratuita de Google Gemini. La key no se guarda en ningún servidor — se procesa localmente en tu navegador.</p>
+
+    <div class="demo-interface">
+      <div class="demo-tabs">
+        <div class="demo-tab on" onclick="switchTab('simulador',this)">SIMULADOR DE TESIS</div>
+        <div class="demo-tab" onclick="switchTab('tipos',this)">TIPOS DE TRABAJO</div>
+        <div class="demo-tab" onclick="switchTab('estilos',this)">ESTILOS DE CITA</div>
+      </div>
+
+      <!-- TAB SIMULADOR -->
+      <div class="demo-panel on" id="tab-simulador">
+        <div class="sim-grid">
+          <div class="sim-left">
+            <div class="sim-title">Generá una sección de muestra</div>
+
+            <div class="sim-campo">
+              <label class="sim-label">Tipo de trabajo</label>
+              <select class="sim-select" id="sim-tipo">
+                <option value="Tesis de grado">Tesis de grado</option>
+                <option value="Trabajo final de tecnicatura">Trabajo final de tecnicatura</option>
+                <option value="Monografía">Monografía</option>
+                <option value="Investigación escolar">Investigación escolar</option>
+                <option value="Informe técnico">Informe técnico</option>
+              </select>
+            </div>
+
+            <div class="sim-campo">
+              <label class="sim-label">Tema del trabajo</label>
+              <input class="sim-input" id="sim-tema" type="text" placeholder="Ej: Calidad microbiológica en langostino patagónico" />
+            </div>
+
+            <div class="sim-campo">
+              <label class="sim-label">Área disciplinar</label>
+              <select class="sim-select" id="sim-area">
+                <option>ciencias de la salud</option>
+                <option>ciencias naturales y exactas</option>
+                <option>ingeniería y tecnología</option>
+                <option>ciencias sociales y humanidades</option>
+                <option>educación y pedagogía</option>
+                <option>ciencias económicas y administrativas</option>
+              </select>
+            </div>
+
+            <div class="sim-campo">
+              <label class="sim-label">Sección a generar</label>
+              <select class="sim-select" id="sim-seccion">
+                <option>Introducción</option>
+                <option>Marco teórico</option>
+                <option>Planteamiento del problema</option>
+                <option>Metodología</option>
+                <option>Justificación</option>
+                <option>Conclusiones</option>
+              </select>
+            </div>
+
+            <div class="sim-campo">
+              <label class="sim-label">Estilo de cita</label>
+              <select class="sim-select" id="sim-cita">
+                <option>APA 7ma edición</option>
+                <option>Vancouver</option>
+                <option>Chicago</option>
+                <option>ICONTEC</option>
+              </select>
+            </div>
+
+            <div class="sim-campo">
+              <label class="sim-label">API Key Gemini (gratuita)</label>
+              <input class="sim-input" id="sim-apikey" type="password" placeholder="AIza... · Obtené la tuya en aistudio.google.com" />
+            </div>
+
+            <button class="sim-btn-gen" id="sim-btn" onclick="simGenerar()">
+              <span>⚡</span> Generar sección ahora
+            </button>
+          </div>
+
+          <div class="sim-right">
+            <div class="sim-out-hdr">
+              <span class="sim-out-tit" id="sim-out-tit">RESULTADO · TEXTO GENERADO</span>
+            </div>
+            <div class="sim-out-body" id="sim-out">Completá los campos de la izquierda y presioná "Generar sección".
+
+El resultado aparece aquí en texto plano — sin Markdown, sin asteriscos, sin formato especial.
+
+La herramienta completa te permite:
+— Generar el índice completo automáticamente
+— Editar el índice antes de generar
+— Generar cada sección con un clic
+— Guardar el progreso en la nube
+— Descargar el trabajo completo en .txt</div>
+            <div class="sim-aviso">⚠ BORRADOR — Todo trabajo generado requiere revisión, verificación y edición por el autor antes de su presentación académica.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB TIPOS -->
+      <div class="demo-panel" id="tab-tipos">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">🎓</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Tesis de Grado</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Para licenciaturas y carreras universitarias. Estructura completa con marco teórico, metodología, resultados y bibliografía en el estilo requerido por la institución.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Universitario · APA / Vancouver / Chicago</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">⚙️</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Trabajo Final de Tecnicatura</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Adaptado al nivel terciario técnico. Incluye secciones de aplicación práctica, análisis de caso y conclusiones técnicas según el área de la carrera.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Terciario · Todos los estilos</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">🔬</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Tesis de Posgrado</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Para maestrías y doctorados. Mayor profundidad metodológica, revisión sistemática de literatura y discusión crítica de resultados.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Posgrado · Alta rigurosidad</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">📄</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Monografía</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Exploración temática de mediana extensión. Ideal para materias universitarias o seminarios. Estructura ágil con introducción, desarrollo temático y conclusiones.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Todos los niveles</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">📚</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Investigación Escolar</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Para trabajos de nivel secundario. Estructura simplificada y lenguaje adaptado al nivel, con énfasis en la formulación del problema y la recolección de información.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Secundario · Extensión corta</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-size:1.5rem;margin-bottom:.75rem">📊</div>
+            <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.5rem">Informe Técnico</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6">Para contextos profesionales y aplicados. Estructura orientada a resultados con descripción de procedimientos, análisis de datos y recomendaciones concretas.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);margin-top:.75rem">Profesional · ICONTEC / libre</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB ESTILOS -->
+      <div class="demo-panel" id="tab-estilos">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;color:var(--oro);margin-bottom:.75rem">APA 7MA EDICIÓN</div>
+            <div style="font-size:.85rem;color:var(--crema);font-weight:500;margin-bottom:.5rem">American Psychological Association</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6;margin-bottom:.75rem">El más usado en ciencias sociales, educación y psicología. Citas autor-fecha con lista de referencias al final.</div>
+            <div style="font-family:var(--fm);font-size:.68rem;background:#0a0a0a;border:1px solid #2a2a2a;padding:.75rem;color:#888;line-height:1.7">García, M. (2023). Metodología de la investigación. Editorial Académica.<br>(García, 2023, p. 45)</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;color:var(--oro);margin-bottom:.75rem">VANCOUVER</div>
+            <div style="font-size:.85rem;color:var(--crema);font-weight:500;margin-bottom:.5rem">Ciencias de la Salud</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6;margin-bottom:.75rem">Estándar en medicina, biología y ciencias de la salud. Sistema numérico secuencial, referencias al pie o al final.</div>
+            <div style="font-family:var(--fm);font-size:.68rem;background:#0a0a0a;border:1px solid #2a2a2a;padding:.75rem;color:#888;line-height:1.7">1. García M. Metodología de la investigación. Buenos Aires: Editorial; 2023.<br>Según García (1), los resultados...</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;color:var(--oro);margin-bottom:.75rem">CHICAGO</div>
+            <div style="font-size:.85rem;color:var(--crema);font-weight:500;margin-bottom:.5rem">Humanidades e Historia</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6;margin-bottom:.75rem">Utilizado en historia, literatura y humanidades. Sistema de notas al pie con bibliografía final o autor-fecha.</div>
+            <div style="font-family:var(--fm);font-size:.68rem;background:#0a0a0a;border:1px solid #2a2a2a;padding:.75rem;color:#888;line-height:1.7">¹ María García, Metodología de la investigación (Buenos Aires: Editorial, 2023), 45.<br>García, María. 2023. Metodología...</div>
+          </div>
+          <div style="background:#111;border:1px solid #1a1a1a;padding:1.5rem;">
+            <div style="font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;color:var(--oro);margin-bottom:.75rem">ICONTEC</div>
+            <div style="font-size:.85rem;color:var(--crema);font-weight:500;margin-bottom:.5rem">Norma Técnica Colombiana</div>
+            <div style="font-size:.8rem;color:var(--gris-cl);line-height:1.6;margin-bottom:.75rem">Estándar colombiano ampliamente usado en América Latina para trabajos de grado e informes institucionales.</div>
+            <div style="font-family:var(--fm);font-size:.68rem;background:#0a0a0a;border:1px solid #2a2a2a;padding:.75rem;color:#888;line-height:1.7">GARCÍA, María. Metodología de la investigación. Buenos Aires: Editorial, 2023. 45 p.<br>¹ GARCÍA, op. cit., p. 45.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como">
+  <div class="sec-inner">
+    <div class="sec-tag">Flujo de trabajo</div>
+    <h2 class="sec-h2">Cuatro pasos para<br><em>tu trabajo completo</em></h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num-wrap"><div class="step-num">01</div></div>
+        <div class="step-title">Configuración</div>
+        <div class="step-desc">Ingresás tu tipo de trabajo, área disciplinar, nivel educativo, extensión y estilo de cita. La IA adapta todo el contenido a tu perfil.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap"><div class="step-num">02</div></div>
+        <div class="step-title">Índice</div>
+        <div class="step-desc">La IA genera la estructura completa con todos los capítulos y subcapítulos. Podés editar el índice libremente antes de continuar.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap"><div class="step-num">03</div></div>
+        <div class="step-title">Desarrollo</div>
+        <div class="step-desc">Generás cada sección con un clic o todas de una vez. La IA mantiene coherencia temática usando el índice completo como contexto.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap"><div class="step-num">04</div></div>
+        <div class="step-title">Exportación</div>
+        <div class="step-desc">Descargás el trabajo completo en .txt, sin Markdown, listo para pegar en Word o Google Docs y continuar la edición.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPOS DE TRABAJO -->
+<section id="tipos">
+  <div class="sec-inner">
+    <div class="sec-tag">Tipos de trabajo soportados</div>
+    <h2 class="sec-h2">Desde secundario<br><em>hasta posgrado</em></h2>
+    <div class="tipos-grid">
+      <div class="tipo-card"><div class="tipo-icon">🎓</div><div class="tipo-body"><div class="tipo-title">Tesis de Grado</div><div class="tipo-desc">Licenciaturas y carreras universitarias</div><div class="tipo-nivel">UNIVERSITARIO · APA / Vancouver / Chicago</div></div></div>
+      <div class="tipo-card"><div class="tipo-icon">🔬</div><div class="tipo-body"><div class="tipo-title">Tesis de Posgrado</div><div class="tipo-desc">Maestrías y doctorados con alta rigurosidad metodológica</div><div class="tipo-nivel">POSGRADO · Todos los estilos</div></div></div>
+      <div class="tipo-card"><div class="tipo-icon">⚙️</div><div class="tipo-body"><div class="tipo-title">Trabajo Final de Tecnicatura</div><div class="tipo-desc">Nivel terciario técnico con enfoque aplicado</div><div class="tipo-nivel">TERCIARIO · ICONTEC / APA</div></div></div>
+      <div class="tipo-card"><div class="tipo-icon">📄</div><div class="tipo-body"><div class="tipo-title">Monografía</div><div class="tipo-desc">Exploración temática para materias y seminarios</div><div class="tipo-nivel">TODOS LOS NIVELES</div></div></div>
+      <div class="tipo-card"><div class="tipo-icon">📚</div><div class="tipo-body"><div class="tipo-title">Investigación Escolar</div><div class="tipo-desc">Trabajos de investigación para nivel secundario</div><div class="tipo-nivel">SECUNDARIO · Extensión corta</div></div></div>
+      <div class="tipo-card"><div class="tipo-icon">📊</div><div class="tipo-body"><div class="tipo-title">Informe Técnico</div><div class="tipo-desc">Para contextos profesionales y aplicados</div><div class="tipo-nivel">PROFESIONAL · Libre / ICONTEC</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRECIOS -->
+<section id="precios">
+  <div class="sec-inner">
+    <div class="sec-tag">Licencias de acceso</div>
+    <h2 class="sec-h2">Acceso sin suscripción<br><em>mensual</em></h2>
+    <p class="sec-p">Las licencias son individuales. Un usuario, un dispositivo. Gestión directa — contactás por mail, recibís tus credenciales y entrás.</p>
+    <div class="precio-grid">
+      <div class="precio-card">
+        <div class="precio-plan">Licencia Individual</div>
+        <div class="precio-monto"><sup>$</sup>Consultar</div>
+        <div class="precio-periodo">Licencia anual renovable</div>
+        <ul class="precio-features">
+          <li>Acceso completo a la herramienta</li>
+          <li>1 usuario · 1 dispositivo</li>
+          <li>Todos los tipos de trabajo</li>
+          <li>Todos los estilos de cita</li>
+          <li>Guardado en la nube</li>
+          <li>Descarga .txt ilimitada</li>
+          <li>API Key de Gemini propia (gratuita)</li>
+          <li class="no">Soporte prioritario</li>
+        </ul>
+        <a href="mailto:bbbarrera1986@gmail.com?subject=Consulta%20Licencia%20Individual%20Generador%20de%20Tesis%20BRB&body=Hola%20Boris%2C%20quiero%20consultar%20sobre%20el%20Generador%20de%20Tesis%20BRB.%0A%0ANombre%3A%0AInstitución%3A%0ANivel%20educativo%3A" class="btn-p" style="width:100%;justify-content:center">Consultar precio →</a>
+      </div>
+      <div class="precio-card featured">
+        <div class="precio-plan">Licencia Institucional</div>
+        <div class="precio-monto"><sup>$</sup>Consultar</div>
+        <div class="precio-periodo">Para institutos y universidades</div>
+        <ul class="precio-features">
+          <li>Múltiples usuarios</li>
+          <li>Gestión centralizada por el administrador</li>
+          <li>Todos los tipos de trabajo</li>
+          <li>Todos los estilos de cita</li>
+          <li>Guardado en la nube por usuario</li>
+          <li>Descarga .txt ilimitada</li>
+          <li>API Key colectiva opcional</li>
+          <li>Soporte prioritario directo</li>
+        </ul>
+        <a href="mailto:bbbarrera1986@gmail.com?subject=Consulta%20Licencia%20Institucional%20Generador%20de%20Tesis%20BRB&body=Hola%20Boris%2C%20quiero%20consultar%20sobre%20licencias%20institucionales%20para%20el%20Generador%20de%20Tesis%20BRB.%0A%0AInstitución%3A%0ACantidad%20de%20usuarios%3A%0ANivel%20educativo%3A" class="btn-p" style="width:100%;justify-content:center">Consultar precio →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVISO ACADÉMICO -->
+<section id="aviso">
+  <div class="sec-inner">
+    <div class="aviso-box">
+      <div class="aviso-title">⚠ Principio de responsabilidad académica</div>
+      <div class="aviso-text">Todo texto generado por el Generador de Tesis BRB es un <strong>borrador orientativo</strong>. El autor es el único responsable de revisar el contenido, verificar las fuentes citadas, adaptar el texto a su voz académica y cumplir con las normativas de integridad académica de su institución. <strong>Esta herramienta es un asistente de escritura, no un reemplazante del pensamiento crítico.</strong> El uso del texto generado sin revisión y edición propia puede constituir una falta de integridad académica según las políticas de cada institución.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / CONTACTO -->
+<section id="contacto">
+  <div class="cta-tag">Acceso al Generador de Tesis BRB</div>
+  <h2 class="cta-h2">¿Listo para empezar<br><em>tu investigación?</em></h2>
+  <p class="cta-desc">Las licencias son individuales, por correo electrónico. Sin suscripciones mensuales — licencia anual renovable. Gestión directa sin intermediarios.</p>
+  <div class="cta-btns">
+    <a href="mailto:bbbarrera1986@gmail.com?subject=Quiero%20acceder%20al%20Generador%20de%20Tesis%20BRB&body=Hola%20Boris%2C%0A%0AQuiero%20acceder%20al%20Generador%20de%20Tesis%20BRB.%0A%0ANombre%3A%0ACorreo%3A%0AInstitución%3A%0ANivel%20educativo%3A%0ATipo%20de%20trabajo%3A" class="btn-p" style="font-size:.9rem;padding:18px 44px">Solicitar acceso por Gmail →</a>
+    <a href="https://bbbarrera1986-rgb.github.io/generador-tesis-brb/" target="_blank" class="btn-s" style="font-size:.9rem">Ir a la herramienta</a>
+  </div>
+  <div class="cta-info">
+    Respondemos en menos de 24 horas · <a href="mailto:bbbarrera1986@gmail.com">bbbarrera1986@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-name">Boris Rodríguez Barrera</div>
+      <div class="footer-orcid">ORCID: 0009-0004-6583-6439</div>
+      <p class="footer-txt">Especialista en Gestión de Calidad, Procesos Industriales y Microbiología.<br>Docente — Escuela Municipal de Pesca "Juan Demonte" N.° 2701.<br>Puerto Madryn, Chubut, Argentina.</p>
+      <div class="footer-brands">
+        <div class="footer-brand-item">BRB Estrategia &amp; Procesos</div>
+        <div class="footer-brand-item">Soberanía Técnica Ediciones</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-tit">Contacto</div>
+      <a class="footer-link" href="mailto:bbbarrera1986@gmail.com?subject=Consulta%20Generador%20de%20Tesis%20BRB">✉ bbbarrera1986@gmail.com</a>
+      <a class="footer-link" href="tel:+5429751576351">📞 +54 297 517-6351</a>
+      <a class="footer-link" href="https://github.com/bbbarrera1986-rgb" target="_blank">🐙 github.com/bbbarrera1986-rgb</a>
+      <div style="margin-top:1.5rem">
+        <a href="mailto:bbbarrera1986@gmail.com?subject=Quiero%20acceder%20al%20Generador%20de%20Tesis%20BRB&body=Hola%20Boris%2C%0A%0AQuiero%20acceder%20al%20Generador%20de%20Tesis%20BRB.%0A%0ANombre%3A%0ACorreo%3A%0AInstitución%3A%0ANivel%20educativo%3A" class="btn-p" style="font-size:.7rem;padding:10px 18px">Solicitar licencia →</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-tit">Ecosistema BRB IA</div>
+      <p class="footer-txt" style="margin-bottom:1rem">Herramientas educativas con IA bajo metodología RTFC y protocolo SAVI de verificación.</p>
+      <div class="footer-eco-item">Generador de Estudio BRB v2.1</div>
+      <div class="footer-eco-item">Generador de Clases BRB v2.1</div>
+      <div class="footer-eco-item">Plataforma de Tutoría BRB v1.0</div>
+      <div class="footer-eco-item">Asesor de Dirección BRB v2.0</div>
+      <div class="footer-eco-item">EvaluAR BRB v1.0</div>
+      <div class="footer-eco-item current">Generador de Tesis BRB v1.0 ·</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 BRB Estrategia &amp; Procesos · Soberanía Técnica Ediciones · Puerto Madryn, Chubut, Argentina</div>
+    <div class="footer-copy">Generador de Tesis BRB v1.0 · Todos los derechos reservados</div>
+  </div>
+</footer>
+
+<script>
+// ── TABS DEMO ──
+function switchTab(id, el) {
+  document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('tab-' + id).classList.add('on');
+}
+
+// ── SIMULADOR ──
+async function simGenerar() {
+  const tipo    = document.getElementById('sim-tipo').value;
+  const tema    = document.getElementById('sim-tema').value.trim() || 'un tema académico';
+  const area    = document.getElementById('sim-area').value;
+  const seccion = document.getElementById('sim-seccion').value;
+  const cita    = document.getElementById('sim-cita').value;
+  const apikey  = document.getElementById('sim-apikey').value.trim();
+  const out     = document.getElementById('sim-out');
+  const btn     = document.getElementById('sim-btn');
+
+  if (!apikey) {
+    out.textContent = 'ERROR: Ingresá tu API Key de Gemini para generar la sección.\n\nObtené una clave gratuita en:\nhttps://aistudio.google.com/apikey\n\nEs completamente gratuita y no requiere tarjeta de crédito.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+  out.textContent = 'Conectando con Gemini 2.5 Flash...\n\nEsto puede tardar entre 10 y 30 segundos según la longitud de la sección.';
+
+  const prompt = `Sos un metodólogo especializado en ${area}. Redactá la sección "${seccion}" de una ${tipo} titulada "${tema}" con estilo de cita ${cita}. Aproximadamente 250 palabras. INSTRUCCIONES: texto plano sin asteriscos ni markdown, título en mayúsculas al inicio, párrafos separados por línea en blanco, tono académico formal.`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apikey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `Error ${res.status}`);
+    }
+
+    const data = await res.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Strip markdown
+    text = text.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1')
+               .replace(/#+\s*/g,'').replace(/_{1,2}(.+?)_{1,2}/g,'$1').trim();
+
+    out.textContent = text;
+    document.getElementById('sim-out-tit').textContent = `${seccion.toUpperCase()} · BORRADOR GENERADO`;
+
+  } catch(e) {
+    out.textContent = `ERROR: ${e.message}\n\nVerificá que tu API Key sea válida y que tengas conexión a internet.`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span> Generar sección ahora';
+  }
+}
+
+// ── NAV ACTIVO EN SCROLL ──
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--oro)' : '';
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
