@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Generador de Tesis BRB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B3A6B;--navy-mid:#254d8c;
+  --oro:#C8A84B;--oro-dim:#8a7233;--oro-bg:rgba(200,168,75,.08);
+  --crema:#F7F4EF;--crema-dark:#ede8df;
+  --negro:#0A0A0A;--gris:#111;--gris-b:#1e1e1e;--gris-cl:#888;
+  --error:#c0392b;--success:#1a7a4a;
+  --fd:'Cormorant Garamond',Georgia,serif;
+  --fm:'IBM Plex Mono','Courier New',monospace;
+  --fb:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:var(--negro);color:var(--crema);font-family:var(--fb);display:grid;grid-template-columns:280px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:#080808;border-right:1px solid var(--gris-b);display:flex;flex-direction:column;overflow-y:auto;z-index:100;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:#2a2a2a;}
+.sb-logo{padding:2rem 1.5rem 1.5rem;border-bottom:1px solid var(--gris-b);}
+.sb-marca{font-family:var(--fd);font-size:1.4rem;font-weight:700;color:var(--oro);letter-spacing:.05em;}
+.sb-marca em{color:var(--crema);font-weight:300;font-style:italic;}
+.sb-sub{font-family:var(--fm);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gris-cl);margin-top:.25rem;}
+.sb-version{font-family:var(--fm);font-size:.55rem;color:#333;margin-top:.25rem;}
+.sb-sec{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#333;padding:.75rem 1.5rem .4rem;}
+.sb-link{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.5rem;text-decoration:none;color:var(--gris-cl);font-size:.82rem;transition:all .15s;border-left:2px solid transparent;}
+.sb-link:hover{color:var(--crema);background:rgba(255,255,255,.03);border-left-color:var(--oro-dim);}
+.sb-link.activo{color:var(--oro);background:var(--oro-bg);border-left-color:var(--oro);}
+.sb-num{font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);min-width:22px;}
+.sb-footer{margin-top:auto;padding:1.5rem;border-top:1px solid var(--gris-b);}
+.sb-footer-brand{font-family:var(--fm);font-size:.55rem;color:#2a2a2a;letter-spacing:.08em;line-height:1.8;}
+.sb-footer-brand a{color:var(--oro-dim);text-decoration:none;}
+
+/* CONTENIDO */
+.contenido{grid-column:2;margin-left:0;}
+
+/* PORTADA */
+.portada{background:linear-gradient(135deg,var(--navy) 0%,#0d1f3a 60%,var(--negro) 100%);padding:80px 80px 60px;border-bottom:1px solid var(--gris-b);position:relative;overflow:hidden;}
+.portada::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(200,168,75,.1) 0%,transparent 70%);pointer-events:none;}
+.portada-eyebrow{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(200,168,75,.6);margin-bottom:1.5rem;}
+.portada-titulo{font-family:var(--fd);font-size:3.5rem;font-weight:300;line-height:1.05;margin-bottom:1.25rem;position:relative;z-index:1;}
+.portada-titulo em{color:var(--oro);font-style:italic;}
+.portada-sub{font-size:.95rem;color:rgba(245,240,232,.7);line-height:1.75;max-width:620px;margin-bottom:2rem;}
+.portada-chips{display:flex;flex-wrap:wrap;gap:.5rem;}
+.chip{font-family:var(--fm);font-size:.58rem;letter-spacing:.08em;padding:.3rem .75rem;background:rgba(200,168,75,.1);border:1px solid rgba(200,168,75,.2);color:var(--oro);clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+
+/* SECCIONES */
+.seccion{padding:56px 80px;border-bottom:1px solid var(--gris-b);}
+.seccion:last-child{border-bottom:none;}
+.sec-num{font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--oro-dim);margin-bottom:.75rem;}
+.sec-titulo{font-family:var(--fd);font-size:2.2rem;font-weight:300;line-height:1.15;margin-bottom:1.25rem;}
+.sec-titulo em{color:var(--oro);font-style:italic;}
+.sec-lead{font-size:1rem;color:var(--crema-dark);line-height:1.8;margin-bottom:2rem;max-width:680px;}
+.sec-p{font-size:.9rem;color:var(--gris-cl);line-height:1.8;margin-bottom:1.25rem;max-width:680px;}
+.sec-p strong{color:var(--crema);}
+.sec-h3{font-family:var(--fd);font-size:1.3rem;font-weight:600;color:var(--crema);margin:2rem 0 .75rem;}
+.sec-h4{font-family:var(--fm);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oro);margin:1.5rem 0 .6rem;}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:0;margin:1.5rem 0;}
+.step{display:flex;gap:1.5rem;padding:1.25rem 0;border-bottom:1px solid #111;position:relative;}
+.step:last-child{border-bottom:none;}
+.step-left{display:flex;flex-direction:column;align-items:center;gap:0;}
+.step-num-box{width:36px;height:36px;background:var(--negro);border:1px solid var(--oro-dim);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.75rem;color:var(--oro);flex-shrink:0;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+.step-line{flex:1;width:1px;background:#1a1a1a;margin-top:.25rem;}
+.step-body{flex:1;padding-bottom:.5rem;}
+.step-title{font-family:var(--fb);font-size:.9rem;font-weight:600;color:var(--crema);margin-bottom:.4rem;}
+.step-desc{font-size:.85rem;color:var(--gris-cl);line-height:1.65;}
+.step-desc strong{color:var(--crema);}
+
+/* CARDS */
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;}
+.card-grid-3{grid-template-columns:repeat(3,1fr);}
+.card{background:#0a0a0a;border:1px solid var(--gris-b);padding:1.5rem;}
+.card-icon{font-size:1.5rem;margin-bottom:.75rem;}
+.card-title{font-family:var(--fb);font-size:.9rem;font-weight:600;color:var(--crema);margin-bottom:.4rem;}
+.card-desc{font-size:.8rem;color:var(--gris-cl);line-height:1.6;}
+.card-tag{font-family:var(--fm);font-size:.55rem;color:var(--oro-dim);margin-top:.6rem;letter-spacing:.08em;}
+
+/* TIP / AVISO */
+.tip{background:rgba(200,168,75,.05);border:1px solid rgba(200,168,75,.15);border-left:3px solid var(--oro);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.85rem;color:var(--crema-dark);line-height:1.65;}
+.tip strong{color:var(--oro);}
+.aviso{background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.2);border-left:3px solid var(--error);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.85rem;color:var(--crema-dark);line-height:1.65;}
+.aviso strong{color:#e74c3c;}
+.info{background:rgba(27,58,107,.1);border:1px solid rgba(37,77,140,.25);border-left:3px solid var(--navy-mid);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.85rem;color:var(--crema-dark);line-height:1.65;}
+
+/* CODE */
+.code-block{background:#080808;border:1px solid #1a1a1a;border-left:3px solid var(--oro-dim);padding:1rem 1.25rem;margin:1rem 0;font-family:var(--fm);font-size:.78rem;color:#aaa;line-height:1.7;white-space:pre-wrap;overflow-x:auto;}
+.code-label{font-family:var(--fm);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oro-dim);margin-bottom:.4rem;}
+
+/* TABLE */
+.tabla{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.82rem;}
+.tabla th{background:#0a0a0a;font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--oro);padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--oro-dim);}
+.tabla td{padding:.7rem 1rem;border-bottom:1px solid #111;color:var(--crema-dark);vertical-align:top;line-height:1.5;}
+.tabla tr:last-child td{border-bottom:none;}
+.tabla tr:hover td{background:#080808;}
+
+/* LISTA */
+.lista{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin:1rem 0;}
+.lista li{display:flex;align-items:flex-start;gap:.75rem;font-size:.875rem;color:var(--crema-dark);line-height:1.6;}
+.lista li::before{content:'→';color:var(--oro-dim);flex-shrink:0;margin-top:.05rem;font-family:var(--fm);}
+.lista li strong{color:var(--crema);}
+
+/* BADGE */
+.badge{display:inline-block;font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;padding:.25rem .6rem;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.badge-oro{background:var(--oro-bg);border:1px solid rgba(200,168,75,.2);color:var(--oro);}
+.badge-navy{background:rgba(27,58,107,.2);border:1px solid rgba(37,77,140,.3);color:#7aa3d4;}
+.badge-err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);color:#e74c3c;}
+.badge-ok{background:rgba(26,122,74,.1);border:1px solid rgba(26,122,74,.2);color:#4caf82;}
+
+/* CONTACTO FINAL */
+.contacto-box{background:linear-gradient(135deg,var(--navy) 0%,#0d1f3a 100%);padding:3rem;text-align:center;margin-top:2rem;}
+.contacto-titulo{font-family:var(--fd);font-size:2rem;font-weight:300;margin-bottom:1rem;}
+.contacto-titulo em{color:var(--oro);font-style:italic;}
+.contacto-desc{color:rgba(245,240,232,.7);font-size:.9rem;line-height:1.7;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto;}
+.btn-contacto{display:inline-flex;align-items:center;gap:.6rem;background:var(--oro);color:var(--negro);font-family:var(--fb);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:14px 30px;text-decoration:none;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:background .2s;}
+.btn-contacto:hover{background:#e2c97a;}
+
+/* PRINT */
+@media print{body{grid-template-columns:1fr;}.sidebar{display:none;}.seccion,.portada{padding:28px 32px;}}
+@media(max-width:900px){body{grid-template-columns:1fr;}.sidebar{display:none;}.seccion,.portada{padding:32px 24px;}.card-grid{grid-template-columns:1fr;}.card-grid-3{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.card-grid-3{grid-template-columns:1fr;}.portada-titulo{font-size:2.5rem;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-marca">BRB <em>Tesis</em></div>
+    <div class="sb-sub">Manual de Usuario</div>
+    <div class="sb-version">v1.0 · Abril 2026</div>
+  </div>
+  <div class="sb-sec">Contenido</div>
+  <a class="sb-link activo" href="#que-es"><span class="sb-num">01</span>¿Qué es?</a>
+  <a class="sb-link" href="#acceso"><span class="sb-num">02</span>Cómo ingresar</a>
+  <a class="sb-link" href="#apikey"><span class="sb-num">03</span>La API Key</a>
+  <a class="sb-link" href="#wizard"><span class="sb-num">04</span>El wizard de configuración</a>
+  <a class="sb-link" href="#indice"><span class="sb-num">05</span>Generar el índice</a>
+  <a class="sb-link" href="#secciones"><span class="sb-num">06</span>Generar secciones</a>
+  <a class="sb-link" href="#adjuntos"><span class="sb-num">07</span>Adjuntar documentos</a>
+  <a class="sb-link" href="#guardar"><span class="sb-num">08</span>Guardado y descarga</a>
+  <a class="sb-link" href="#tipos"><span class="sb-num">09</span>Tipos de trabajo</a>
+  <a class="sb-link" href="#estilos"><span class="sb-num">10</span>Estilos de cita</a>
+  <a class="sb-link" href="#limites"><span class="sb-num">11</span>Límites y licencia</a>
+  <a class="sb-link" href="#faq"><span class="sb-num">12</span>Preguntas frecuentes</a>
+  <a class="sb-link" href="#contacto"><span class="sb-num">13</span>Contacto</a>
+  <div class="sb-footer">
+    <div class="sb-footer-brand">
+      BRB Estrategia &amp; Procesos<br>
+      Soberanía Técnica Ediciones<br>
+      Puerto Madryn · Chubut · Argentina<br>
+      <a href="mailto:bbbarrera1986@gmail.com">bbbarrera1986@gmail.com</a>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENIDO -->
+<div class="contenido">
+
+  <!-- PORTADA -->
+  <div class="portada">
+    <div class="portada-eyebrow">Manual de Usuario · BRB Estrategia &amp; Procesos</div>
+    <div class="portada-titulo">Generador de<br><em>Tesis</em> BRB</div>
+    <div class="portada-sub">Guía completa para elaborar trabajos de investigación académica con inteligencia artificial. Desde secundario hasta posgrado — índice automático, desarrollo por secciones, 5 estilos de cita y exportación en texto plano.</div>
+    <div class="portada-chips">
+      <span class="chip">Para estudiantes e investigadores</span>
+      <span class="chip">Todos los niveles educativos</span>
+      <span class="chip">v1.0</span>
+      <span class="chip">Gemini 2.5 Flash</span>
+      <span class="chip">6.ª herramienta BRB IA</span>
+    </div>
+  </div>
+
+  <!-- 01 QUÉ ES -->
+  <div class="seccion" id="que-es">
+    <div class="sec-num">01 · ¿Qué es?</div>
+    <div class="sec-titulo">Tu tesis en partes,<br><em>con coherencia global</em></div>
+    <div class="sec-lead">El Generador de Tesis BRB es una herramienta de inteligencia artificial que te ayuda a estructurar y desarrollar trabajos de investigación académica. Genera el índice completo, desarrolla cada sección individualmente manteniendo coherencia temática, y exporta el resultado en texto plano listo para editar.</div>
+
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Índice automático</div>
+        <div class="card-desc">Genera la estructura completa del trabajo según tu tipo de investigación, área y nivel educativo.</div>
+        <div class="card-tag">Editable antes de generar</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✍️</div>
+        <div class="card-title">Sección por sección</div>
+        <div class="card-desc">Cada capítulo se genera individualmente. La IA usa el índice completo como contexto para mantener coherencia.</div>
+        <div class="card-tag">Contexto global persistente</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <div class="card-title">Guardado automático</div>
+        <div class="card-desc">El trabajo se guarda en la nube. Retomás exactamente donde lo dejaste al volver a ingresar.</div>
+        <div class="card-tag">1 usuario · 1 dispositivo</div>
+      </div>
+    </div>
+
+    <div class="tip"><strong>💡 Principio fundamental:</strong> Esta herramienta genera borradores orientativos. El texto producido por la IA debe ser revisado, verificado y editado por el autor antes de cualquier presentación académica. No reemplaza el pensamiento crítico ni la investigación original.</div>
+  </div>
+
+  <!-- 02 ACCESO -->
+  <div class="seccion" id="acceso">
+    <div class="sec-num">02 · Cómo ingresar</div>
+    <div class="sec-titulo">Acceso en<br><em>tres pantallas</em></div>
+    <div class="sec-lead">La herramienta tiene tres pantallas de acceso que se recorren una sola vez. A partir del segundo ingreso, el sistema reconoce tu dispositivo y te lleva directamente al trabajo guardado.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Pantalla de login</div>
+          <div class="step-desc">Ingresás tu <strong>correo electrónico</strong> y tu <strong>clave de acceso BRB</strong> (formato BRB-TES-2026-XX01). Esta clave te la proporciona el administrador al activar tu licencia. No es tu contraseña de Gmail — es una clave específica de la herramienta.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Pantalla de API Key</div>
+          <div class="step-desc">Pegás tu clave personal de Google Gemini (gratuita). Esta pantalla aparece <strong>solo la primera vez</strong>. A partir de entonces la key queda guardada en tu navegador y no tenés que volver a ingresarla.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">3</div></div>
+        <div class="step-body">
+          <div class="step-title">Wizard de configuración</div>
+          <div class="step-desc">Completás los 4 pasos de configuración: tipo de trabajo, datos del tema, estructura y contexto. Esta configuración también se guarda — si cerrás antes de terminar, retomás donde dejaste.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aviso"><strong>⚠ Un dispositivo por usuario:</strong> Al primer login, el sistema registra automáticamente tu dispositivo. Si intentás ingresar desde otra computadora o teléfono, el acceso será bloqueado. Si necesitás cambiar de dispositivo, contactá al administrador.</div>
+  </div>
+
+  <!-- 03 API KEY -->
+  <div class="seccion" id="apikey">
+    <div class="sec-num">03 · La API Key</div>
+    <div class="sec-titulo">Tu clave personal<br><em>de Google Gemini</em></div>
+    <div class="sec-lead">La herramienta utiliza el modelo Gemini 2.5 Flash de Google para generar el contenido. Para funcionar necesita una API Key — una clave de acceso a ese modelo. La clave es gratuita y la obtenés en Google AI Studio.</div>
+
+    <div class="sec-h3">Cómo obtener tu API Key gratuita</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Accedé a Google AI Studio</div>
+          <div class="step-desc">Abrí <strong>aistudio.google.com/apikey</strong> en tu navegador. Necesitás una cuenta de Google activa. No requiere tarjeta de crédito.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Creá la key</div>
+          <div class="step-desc">Hacé clic en <strong>"Create API key"</strong>. Si no tenés ningún proyecto de Google Cloud, el sistema te pedirá crear uno — seguí los pasos (es automático y gratuito).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">3</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Copiá la key</div>
+          <div class="step-desc">La key generada comienza con <strong>AIza...</strong> y tiene aproximadamente 39 caracteres. Copiala y pegala en el campo de la herramienta.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">4</div></div>
+        <div class="step-body">
+          <div class="step-title">Validación automática</div>
+          <div class="step-desc">La herramienta verifica la key conectándose a Gemini antes de continuar. Si la key es válida, te lleva al wizard. Si hay error, te avisa el motivo específico.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-h3">Límites del plan gratuito</div>
+    <table class="tabla">
+      <tr><th>Modelo</th><th>Requests por minuto</th><th>Requests por día</th><th>Tokens por minuto</th></tr>
+      <tr><td>Gemini 2.5 Flash <span class="badge badge-oro">Recomendado</span></td><td>10 RPM</td><td>250 RPD</td><td>250.000 TPM</td></tr>
+      <tr><td>Gemini 2.5 Pro</td><td>5 RPM</td><td>100 RPD</td><td>250.000 TPM</td></tr>
+      <tr><td>Gemini 2.5 Flash-Lite</td><td>15 RPM</td><td>1.000 RPD</td><td>250.000 TPM</td></tr>
+    </table>
+
+    <div class="tip"><strong>💡 ¿Cuántas tesis puedo generar por día?</strong> Con el plan gratuito de Flash (250 requests/día), podés generar entre 2 y 4 trabajos completos de extensión media por día, dependiendo de la cantidad de secciones del índice. Para uso intensivo, activá la facturación en Google Cloud — el costo es muy bajo.</div>
+
+    <div class="info"><strong>🔒 Privacidad:</strong> Tu API Key se guarda únicamente en tu navegador (localStorage). No se almacena en ningún servidor de BRB. Las solicitudes van directamente desde tu navegador a los servidores de Google.</div>
+  </div>
+
+  <!-- 04 WIZARD -->
+  <div class="seccion" id="wizard">
+    <div class="sec-num">04 · El wizard de configuración</div>
+    <div class="sec-titulo">4 pasos para<br><em>definir tu trabajo</em></div>
+    <div class="sec-lead">El wizard es la pantalla de configuración que completa una sola vez por trabajo. Sus respuestas determinan el tipo de índice que la IA genera, el estilo del contenido, el nivel de profundidad y el formato de las citas. Podés volver a configurar en cualquier momento desde el botón "Reconfigurar".</div>
+
+    <div class="sec-h4">Paso 1 — Tipo de trabajo</div>
+    <div class="sec-p">Seleccionás el tipo de documento que vas a elaborar. Cada tipo genera una estructura diferente.</div>
+    <div class="card-grid">
+      <div class="card"><div class="card-title">🎓 Tesis de Grado</div><div class="card-desc">Para licenciaturas universitarias. Estructura completa con marco teórico, estado del arte, metodología, resultados y bibliografía.</div></div>
+      <div class="card"><div class="card-title">🔬 Tesis de Posgrado</div><div class="card-desc">Para maestrías y doctorados. Mayor profundidad metodológica, revisión sistemática de literatura y discusión crítica.</div></div>
+      <div class="card"><div class="card-title">⚙️ Trabajo Final de Tecnicatura</div><div class="card-desc">Para nivel terciario técnico. Enfoque aplicado con análisis de caso y conclusiones técnicas.</div></div>
+      <div class="card"><div class="card-title">📄 Monografía</div><div class="card-desc">Para materias y seminarios. Estructura ágil con introducción, desarrollo temático y conclusiones.</div></div>
+      <div class="card"><div class="card-title">📚 Investigación Escolar</div><div class="card-desc">Para nivel secundario. Estructura simplificada y lenguaje adaptado al nivel educativo.</div></div>
+      <div class="card"><div class="card-title">📊 Informe Técnico</div><div class="card-desc">Para contextos profesionales. Orientado a resultados con descripción de procedimientos y recomendaciones.</div></div>
+    </div>
+
+    <div class="sec-h4">Paso 2 — Datos del trabajo</div>
+    <div class="sec-p"><strong>Título o tema tentativo:</strong> No tiene que ser el título definitivo. Puede ser una descripción del tema. Cuanto más específico, mejor será el índice generado.</div>
+    <div class="sec-p"><strong>Área disciplinar:</strong> Define el vocabulario técnico y el enfoque metodológico. Opciones: Ciencias Naturales y Exactas, Ciencias Sociales y Humanidades, Ingeniería y Tecnología, Ciencias de la Salud, Educación y Pedagogía, Ciencias Económicas.</div>
+    <div class="sec-p"><strong>Nivel educativo:</strong> Determina la profundidad del contenido y el tono académico. Opciones: Secundario, Terciario, Universitario de Grado, Posgrado.</div>
+
+    <div class="sec-h4">Paso 3 — Estructura</div>
+    <div class="sec-p"><strong>Extensión:</strong> Corta (300 palabras/sección · 10-20 págs), Media (600 palabras/sección · 20-50 págs), Extensa (1000 palabras/sección · +50 págs).</div>
+    <div class="sec-p"><strong>Estilo de cita:</strong> APA 7, Vancouver, Chicago, ICONTEC o Sin estilo. Se aplica en cada sección generada.</div>
+    <div class="sec-p"><strong>Idioma:</strong> Español o inglés.</div>
+
+    <div class="sec-h4">Paso 4 — Contexto adicional (opcional)</div>
+    <div class="sec-p">Campo de texto libre donde describís el problema de investigación, hipótesis tentativa, pregunta central o cualquier información específica que quieras que la IA incorpore. Cuanto más detallado, más preciso será el contenido generado.</div>
+    <div class="tip"><strong>💡 Ejemplo de buen contexto:</strong> "Esta investigación analiza los niveles de contaminación por Listeria monocytogenes en filetes de merluza procesados en tres plantas del Puerto Madryn, evaluando el cumplimiento de la Resolución SENASA 80/96. La hipótesis es que las plantas con mayor antigüedad presentan mayores índices de contaminación por deficiencias en los sistemas de limpieza y desinfección."</div>
+  </div>
+
+  <!-- 05 ÍNDICE -->
+  <div class="seccion" id="indice">
+    <div class="sec-num">05 · Generar el índice</div>
+    <div class="sec-titulo">La estructura<br><em>antes del contenido</em></div>
+    <div class="sec-lead">El índice es el primer paso antes de generar contenido. Define qué secciones va a tener el trabajo y en qué orden. La IA genera entre 15 y 25 ítems numerados adaptados a tu configuración.</div>
+
+    <div class="sec-h3">Cómo generar el índice</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Completá el wizard</div>
+          <div class="step-desc">Una vez finalizado el paso 4 del wizard, hacés clic en <strong>"Generar Estructura →"</strong>. Esto te lleva a la pantalla principal.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Generar el índice</div>
+          <div class="step-desc">En la pantalla principal, hacés clic en el botón <strong>"⚡ Generar Índice"</strong> en la barra superior derecha. La generación tarda entre 10 y 30 segundos.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">3</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-title">Revisar el índice</div>
+          <div class="step-desc">El índice aparece en la barra lateral izquierda. Revisá que todos los capítulos necesarios estén presentes. El índice generado es un punto de partida — podés editarlo.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num-box">4</div></div>
+        <div class="step-body">
+          <div class="step-title">Editar si es necesario</div>
+          <div class="step-desc">Hacés clic en <strong>"✏ Editar"</strong> en el encabezado del sidebar. El índice se convierte en un área de texto editable. Agregá, quitá o reorganizá ítems. Luego clic en <strong>"✓ Aplicar cambios"</strong>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-h3">Formato del índice editable</div>
+    <div class="code-label">Ejemplo de formato correcto</div>
+    <div class="code-block">1. INTRODUCCIÓN
+1.1 Planteamiento del problema
+1.2 Objetivos
+1.3 Justificación
+2. MARCO TEÓRICO
+2.1 Antecedentes
+2.2 Bases conceptuales
+3. METODOLOGÍA
+3.1 Tipo de investigación
+3.2 Población y muestra
+4. RESULTADOS
+5. CONCLUSIONES
+BIBLIOGRAFÍA</div>
+
+    <div class="aviso"><strong>⚠ Importante:</strong> Si editás el índice y eliminás una sección que ya fue generada, el contenido de esa sección se pierde permanentemente. Hacé los cambios al índice <strong>antes</strong> de generar las secciones.</div>
+  </div>
+
+  <!-- 06 SECCIONES -->
+  <div class="seccion" id="secciones">
+    <div class="sec-num">06 · Generar secciones</div>
+    <div class="sec-titulo">El corazón<br><em>de la herramienta</em></div>
+    <div class="sec-lead">Con el índice listo, podés generar cada sección del trabajo. La IA usa el índice completo como contexto global, lo que garantiza coherencia temática entre todos los capítulos.</div>
+
+    <div class="sec-h3">Tres formas de generar</div>
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div class="card-icon">🖱️</div>
+        <div class="card-title">Una por una</div>
+        <div class="card-desc">En cada sección del panel derecho aparece el botón "⚡ Generar". Clic en el botón → la sección se genera → el resultado aparece en el panel.</div>
+        <div class="card-tag">Control total · Recomendado</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Todas de una vez</div>
+        <div class="card-desc">El botón "⚡ Todo" en el sidebar genera todas las secciones pendientes en secuencia automática, con 1,5 segundos de espera entre cada una para respetar los límites de la API.</div>
+        <div class="card-tag">Para trabajos cortos</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">↺</div>
+        <div class="card-title">Regenerar</div>
+        <div class="card-desc">Cada sección generada tiene un botón "↺ Regen". Lo usás si el resultado no te satisface. <strong>Reemplaza el contenido anterior</strong> — no hay forma de recuperarlo.</div>
+        <div class="card-tag">Sin historial de versiones</div>
+      </div>
+    </div>
+
+    <div class="sec-h3">Qué incluye cada sección generada</div>
+    <ul class="lista">
+      <li><strong>Título en mayúsculas</strong> al inicio de la sección</li>
+      <li><strong>Desarrollo completo</strong> de la sección con la extensión configurada (300, 600 o 1000 palabras)</li>
+      <li><strong>Citas en el formato</strong> seleccionado (APA 7, Vancouver, Chicago, ICONTEC)</li>
+      <li><strong>Coherencia temática</strong> con el resto del trabajo gracias al contexto global del índice</li>
+      <li><strong>Texto plano</strong> sin asteriscos, negritas ni ningún formato Markdown</li>
+    </ul>
+
+    <div class="sec-h3">Acciones disponibles en cada sección</div>
+    <table class="tabla">
+      <tr><th>Botón</th><th>Función</th><th>¿Reversible?</th></tr>
+      <tr><td><span class="badge badge-oro">⚡ Generar</span></td><td>Genera el contenido de la sección por primera vez</td><td>—</td></tr>
+      <tr><td><span class="badge badge-navy">📋 Copiar</span></td><td>Copia el texto de la sección al portapapeles</td><td>Sí</td></tr>
+      <tr><td><span class="badge badge-navy">↺ Regen</span></td><td>Regenera la sección con un nuevo resultado</td><td>No · Se pierde el anterior</td></tr>
+    </table>
+
+    <div class="tip"><strong>💡 Recomendación de flujo:</strong> Generá las secciones en orden (1, 2, 3...) porque la IA usa las 2 secciones anteriores como contexto adicional para las siguientes. Esto mejora la coherencia del texto.</div>
+  </div>
+
+  <!-- 07 ADJUNTOS -->
+  <div class="seccion" id="adjuntos">
+    <div class="sec-num">07 · Adjuntar documentos</div>
+    <div class="sec-titulo">Tu investigación<br><em>como base</em></div>
+    <div class="sec-lead">En el paso 4 del wizard podés adjuntar un documento PDF o DOCX que la herramienta usará como referencia temática. El texto del documento se incluye en cada prompt de generación para que la IA produzca contenido más específico y contextualizado.</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Formatos aceptados</div>
+        <div class="card-desc">PDF (con texto extraíble, no escaneado) y DOCX / DOC. La extracción se hace completamente en tu navegador — el archivo nunca se envía a ningún servidor.</div>
+        <div class="card-tag">PDF · DOCX · DOC</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✂️</div>
+        <div class="card-title">Límite de 15.000 caracteres</div>
+        <div class="card-desc">Si el documento supera los 15.000 caracteres, se extrae solo la primera parte. Un aviso te notifica cuando el documento fue recortado.</div>
+        <div class="card-tag">~2.500 palabras máx.</div>
+      </div>
+    </div>
+
+    <div class="sec-h3">¿Qué documentos es útil adjuntar?</div>
+    <ul class="lista">
+      <li><strong>Notas de investigación propias</strong> — resúmenes, observaciones, datos recolectados</li>
+      <li><strong>Trabajos previos</strong> — borradores anteriores, avances del trabajo</li>
+      <li><strong>Material de referencia</strong> — artículos, informes, normativas relevantes al tema</li>
+      <li><strong>Consignas del docente</strong> — requisitos específicos del trabajo según la institución</li>
+    </ul>
+
+    <div class="aviso"><strong>⚠ PDFs escaneados:</strong> Los PDFs generados a partir de escaneos de documentos físicos no funcionan — contienen imágenes, no texto. Solo funcionan PDFs con texto seleccionable (generados digitalmente o con OCR).</div>
+  </div>
+
+  <!-- 08 GUARDAR -->
+  <div class="seccion" id="guardar">
+    <div class="sec-num">08 · Guardado y descarga</div>
+    <div class="sec-titulo">Tu trabajo<br><em>siempre disponible</em></div>
+    <div class="sec-lead">El trabajo se guarda automáticamente en la nube cada vez que generás o regenerás una sección. No hay botón de guardar — el guardado es continuo y transparente.</div>
+
+    <div class="sec-h3">Cómo funciona el guardado</div>
+    <ul class="lista">
+      <li>Cada vez que generás o editás una sección, el guardado se activa <strong>2 segundos después</strong> del último cambio</li>
+      <li>El trabajo se almacena en Supabase asociado a tu licencia y dispositivo</li>
+      <li>Al volver a ingresar, el sistema carga automáticamente el último estado del trabajo</li>
+      <li>El índice, las secciones generadas y la configuración del wizard se recuperan completamente</li>
+    </ul>
+
+    <div class="sec-h3">Descarga en .txt</div>
+    <div class="sec-p">El botón <strong>"⬇ .txt"</strong> en la barra superior descarga el trabajo completo en un archivo de texto plano. El archivo incluye:</div>
+    <div class="code-label">Estructura del archivo descargado</div>
+    <div class="code-block">TESIS DE GRADO
+Análisis microbiológico en langostino patagónico
+────────────────────────────────────────────────────────────
+Área: ciencias de la salud
+Nivel: universitario de grado
+Estilo de cita: Vancouver
+Generado: 22/04/2026 — BRB Generador de Tesis
+════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════
+1. INTRODUCCIÓN
+────────────────────────────────────────────────────────────
+
+[contenido de la sección...]
+
+════════════════════════════════════════════════════════════
+2. MARCO TEÓRICO
+────────────────────────────────────────────────────────────
+
+[contenido de la sección...]</div>
+
+    <div class="tip"><strong>💡 Flujo recomendado:</strong> Descargá el .txt → pegalo en Word o Google Docs → aplicá el formato institucional requerido (fuente, márgenes, interlineado) → revisá y editá el contenido → agregá tablas, gráficos e imágenes propias → corregí y completá las citas bibliográficas.</div>
+
+    <div class="sec-h3">Nueva sesión</div>
+    <div class="sec-p">El botón <strong>"✕ Nueva"</strong> en el encabezado elimina el trabajo actual (índice + secciones) de la nube y te lleva al wizard para comenzar un trabajo nuevo. <strong>Esta acción no es reversible.</strong></div>
+  </div>
+
+  <!-- 09 TIPOS -->
+  <div class="seccion" id="tipos">
+    <div class="sec-num">09 · Tipos de trabajo</div>
+    <div class="sec-titulo">Estructuras adaptadas<br><em>a cada nivel</em></div>
+    <div class="sec-lead">Cada tipo de trabajo genera una estructura diferente. La IA adapta el índice, la profundidad del contenido y el vocabulario al tipo seleccionado.</div>
+
+    <table class="tabla">
+      <tr><th>Tipo de trabajo</th><th>Nivel típico</th><th>Extensión recomendada</th><th>Estructura característica</th></tr>
+      <tr><td>Tesis de Grado</td><td>Universitario</td><td>Media o Extensa</td><td>Portada, resumen, intro, marco teórico, metodología, resultados, discusión, conclusiones, bibliografía</td></tr>
+      <tr><td>Tesis de Posgrado</td><td>Posgrado</td><td>Extensa</td><td>Ídem grado + estado del arte, revisión sistemática, marco conceptual expandido, limitaciones</td></tr>
+      <tr><td>Trabajo Final de Tecnicatura</td><td>Terciario</td><td>Corta o Media</td><td>Intro, marco teórico, análisis de caso, propuesta técnica, conclusiones</td></tr>
+      <tr><td>Monografía</td><td>Todos</td><td>Corta o Media</td><td>Intro, desarrollo por ejes temáticos, conclusiones, bibliografía</td></tr>
+      <tr><td>Investigación Escolar</td><td>Secundario</td><td>Corta</td><td>Intro, planteamiento, marco teórico básico, métodos, resultados, conclusiones</td></tr>
+      <tr><td>Informe Técnico</td><td>Profesional</td><td>Corta o Media</td><td>Resumen ejecutivo, antecedentes, metodología, resultados, recomendaciones</td></tr>
+    </table>
+  </div>
+
+  <!-- 10 ESTILOS -->
+  <div class="seccion" id="estilos">
+    <div class="sec-num">10 · Estilos de cita</div>
+    <div class="sec-titulo">El formato correcto<br><em>para cada disciplina</em></div>
+    <div class="sec-lead">La herramienta aplica el estilo de cita seleccionado en cada sección generada. Las citas son orientativas — siempre verificá que los autores, años y publicaciones referenciadas existan realmente.</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">APA 7ma edición</div>
+        <div class="card-desc">El más usado en ciencias sociales, educación y psicología. Sistema autor-fecha con lista de referencias al final. Recomendado para trabajos de humanidades, educación y ciencias sociales.</div>
+        <div class="card-tag">Ciencias Sociales · Educación · Psicología</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Vancouver</div>
+        <div class="card-desc">Estándar en medicina, biología y ciencias de la salud. Sistema numérico secuencial entre paréntesis o en superíndice. Referencias numeradas al final del documento.</div>
+        <div class="card-tag">Ciencias de la Salud · Biología · Medicina</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Chicago</div>
+        <div class="card-desc">Utilizado en historia, literatura y humanidades. Admite dos sistemas: notas al pie (humanidades) y autor-fecha (ciencias sociales). La herramienta usa el sistema de notas.</div>
+        <div class="card-tag">Historia · Literatura · Humanidades</div>
+      </div>
+      <div class="card">
+        <div class="card-title">ICONTEC</div>
+        <div class="card-desc">Norma Técnica Colombiana ampliamente usada en América Latina para trabajos de grado e informes institucionales. Compatible con muchas universidades latinoamericanas.</div>
+        <div class="card-tag">América Latina · Informes técnicos</div>
+      </div>
+    </div>
+
+    <div class="aviso"><strong>⚠ Verificación de citas obligatoria:</strong> Las citas generadas por la IA son ejemplos del formato correcto pero pueden incluir autores, títulos o publicaciones inventados. <strong>Siempre verificá que cada fuente citada exista realmente</strong> antes de presentar el trabajo. Nunca uses una cita generada por IA sin confirmar su existencia en una base de datos académica.</div>
+  </div>
+
+  <!-- 11 LÍMITES -->
+  <div class="seccion" id="limites">
+    <div class="sec-num">11 · Límites y licencia</div>
+    <div class="sec-titulo">Lo que incluye<br><em>tu licencia</em></div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Incluido en la licencia</div>
+        <div class="card-desc">Acceso completo a la herramienta durante el período contratado. Un usuario, un dispositivo. Todos los tipos de trabajo, todas las áreas, todos los estilos de cita. Guardado en la nube ilimitado. Descarga .txt ilimitada.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">❌</div>
+        <div class="card-title">No incluido</div>
+        <div class="card-desc">El costo de la API de Gemini corre por cuenta del usuario (gratuita con el plan estándar). No incluye soporte para cambio de dispositivo sin autorización del administrador. No incluye historial de versiones de las secciones.</div>
+      </div>
+    </div>
+
+    <div class="sec-h3">Condiciones de la licencia</div>
+    <ul class="lista">
+      <li>La licencia es <strong>individual e intransferible</strong> — no podés compartir tus credenciales</li>
+      <li>El acceso está ligado a <strong>un único dispositivo</strong> registrado en el primer login</li>
+      <li>La licencia tiene <strong>fecha de vencimiento</strong> — al vencer, el acceso se bloquea automáticamente</li>
+      <li>Para renovar, contactás al administrador por email antes del vencimiento</li>
+      <li>Para cambiar de dispositivo, contactás al administrador — el proceso demora menos de 24 horas</li>
+    </ul>
+  </div>
+
+  <!-- 12 FAQ -->
+  <div class="seccion" id="faq">
+    <div class="sec-num">12 · Preguntas frecuentes</div>
+    <div class="sec-titulo">Dudas<br><em>más comunes</em></div>
+
+    <div class="sec-h4">¿Puedo usar el trabajo generado directamente?</div>
+    <div class="sec-p">No sin revisión. El texto generado es un <strong>borrador orientativo</strong> que requiere revisión, edición y verificación de fuentes. Presentar texto generado por IA sin edición ni declaración puede constituir una falta de integridad académica según las políticas de tu institución.</div>
+
+    <div class="sec-h4">¿Se guarda mi API Key en algún servidor?</div>
+    <div class="sec-p">No. La API Key se almacena únicamente en el almacenamiento local de tu navegador (localStorage). Nunca sale de tu computadora hacia servidores de BRB. Las llamadas a Gemini van directamente desde tu navegador a Google.</div>
+
+    <div class="sec-h4">¿Qué pasa si cierro la ventana mientras genera?</div>
+    <div class="sec-p">La generación se interrumpe. El contenido ya generado hasta ese momento está guardado en la nube. Al volver a ingresar, el trabajo se recupera en el estado en que quedó.</div>
+
+    <div class="sec-h4">¿Por qué aparece el error "high demand"?</div>
+    <div class="sec-p">Es un error de los servidores de Google cuando Gemini está sobrecargado. Usualmente desaparece en 2-5 minutos. Simplemente esperá y volvé a intentar. No tiene que ver con tu API Key ni con la herramienta.</div>
+
+    <div class="sec-h4">¿Puedo generar en inglés?</div>
+    <div class="sec-p">Sí. En el paso 3 del wizard seleccionás "Inglés" y toda la generación — índice y secciones — se produce en inglés con el vocabulario académico apropiado.</div>
+
+    <div class="sec-h4">¿El índice editado afecta las secciones ya generadas?</div>
+    <div class="sec-p">Parcialmente. Si editás el índice y <strong>eliminás</strong> una sección ya generada, ese contenido se pierde. Si <strong>agregás</strong> secciones nuevas, las existentes se conservan. Si <strong>renombrás</strong> una sección, la herramienta la trata como nueva (el contenido anterior se pierde).</div>
+
+    <div class="sec-h4">¿Cuántos trabajos puedo tener guardados?</div>
+    <div class="sec-p">Actualmente la licencia permite <strong>un trabajo activo</strong> por usuario. Al crear una nueva sesión con "✕ Nueva", el trabajo anterior se elimina permanentemente de la nube. Si necesitás conservarlo, descargá el .txt antes de empezar uno nuevo.</div>
+
+    <div class="sec-h4">¿Funciona en el celular?</div>
+    <div class="sec-p">La herramienta es funcional en dispositivos móviles pero está optimizada para escritorio. En pantallas pequeñas el sidebar y el panel de secciones se adaptan, aunque la experiencia es mejor en una computadora.</div>
+  </div>
+
+  <!-- 13 CONTACTO -->
+  <div class="seccion" id="contacto">
+    <div class="sec-num">13 · Contacto</div>
+    <div class="sec-titulo">Soporte<br><em>directo</em></div>
+    <div class="sec-lead">El soporte es gestionado directamente por Boris Rodríguez Barrera. Sin intermediarios, sin tickets, sin bots. Respondemos dentro de las 24 horas hábiles.</div>
+
+    <table class="tabla">
+      <tr><th>Motivo</th><th>Cómo contactar</th><th>Tiempo de respuesta</th></tr>
+      <tr><td>Solicitar licencia nueva</td><td><a href="mailto:bbbarrera1986@gmail.com?subject=Solicitud%20de%20licencia%20Generador%20de%20Tesis%20BRB" style="color:var(--oro)">bbbarrera1986@gmail.com</a></td><td>Menos de 24 hs</td></tr>
+      <tr><td>Cambio de dispositivo</td><td><a href="mailto:bbbarrera1986@gmail.com?subject=Cambio%20de%20dispositivo%20Generador%20Tesis%20BRB&body=Nombre%3A%0AEmail%20de%20la%20cuenta%3A%0AMotivo%20del%20cambio%3A" style="color:var(--oro)">bbbarrera1986@gmail.com</a></td><td>Menos de 24 hs</td></tr>
+      <tr><td>Renovación de licencia</td><td><a href="mailto:bbbarrera1986@gmail.com?subject=Renovaci%C3%B3n%20de%20licencia%20Generador%20Tesis%20BRB" style="color:var(--oro)">bbbarrera1986@gmail.com</a></td><td>Menos de 24 hs</td></tr>
+      <tr><td>Problema técnico</td><td><a href="mailto:bbbarrera1986@gmail.com?subject=Problema%20t%C3%A9cnico%20Generador%20Tesis%20BRB&body=Describí%20el%20problema%3A%0A%0ANavegador%20que%20usás%3A%0APantalla%20donde%20ocurre%3A%0AMensaje%20de%20error%20(si%20hay)%3A" style="color:var(--oro)">bbbarrera1986@gmail.com</a></td><td>Menos de 48 hs</td></tr>
+    </table>
+
+    <div class="contacto-box">
+      <div class="contacto-titulo">¿Necesitás<br><em>ayuda ahora?</em></div>
+      <div class="contacto-desc">Escribinos directamente a Gmail con el asunto de tu consulta. Respondemos en el horario de Argentina (GMT-3), de lunes a viernes.</div>
+      <a href="mailto:bbbarrera1986@gmail.com?subject=Consulta%20Generador%20de%20Tesis%20BRB&body=Hola%20Boris%2C%0A%0AQuiero%20consultar%20sobre%3A%0A%0ANombre%3A%0ACorreo%3A" class="btn-contacto">Escribir por Gmail →</a>
+    </div>
+
+    <div style="margin-top:3rem;padding-top:2rem;border-top:1px solid #111;">
+      <div style="font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--crema);margin-bottom:.25rem">Boris Rodríguez Barrera</div>
+      <div style="font-family:var(--fm);font-size:.58rem;color:var(--oro-dim);letter-spacing:.1em;margin-bottom:.75rem">ORCID 0009-0004-6583-6439</div>
+      <div style="font-size:.82rem;color:var(--gris-cl);line-height:1.8">
+        Especialista en Gestión de Calidad, Procesos Industriales y Microbiología<br>
+        Docente — Escuela Municipal de Pesca "Juan Demonte" N.° 2701<br>
+        Puerto Madryn, Chubut, Argentina<br><br>
+        <span style="font-family:var(--fm);font-size:.6rem;color:#333">BRB Estrategia &amp; Procesos · Soberanía Técnica Ediciones</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- fin contenido -->
+
+<script>
+// Sidebar link activo en scroll
+const secciones = document.querySelectorAll('.seccion[id], .portada');
+const links = document.querySelectorAll('.sb-link');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      links.forEach(l => l.classList.remove('activo'));
+      const target = document.querySelector(`.sb-link[href="#${entry.target.id}"]`);
+      if (target) target.classList.add('activo');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+secciones.forEach(s => { if (s.id) observer.observe(s); });
+</script>
+</body>
+</html>
