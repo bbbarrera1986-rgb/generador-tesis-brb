@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Tesis — BRB Estrategia & Procesos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root {
+  --navy:#1B3A6B; --navy-deep:#0F2244; --navy-mid:#254d8c;
+  --oro:#C8A84B; --oro-light:#e2c97a; --oro-dim:#8a7233;
+  --crema:#F7F4EF; --crema-dark:#ede8df;
+  --negro:#0A0A0A; --gris:#2A2A2A; --gris-mid:#444; --gris-light:#888;
+  --error:#c0392b; --success:#1a7a4a;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-mono:'IBM Plex Mono','Courier New',monospace;
+  --font-body:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:var(--negro);color:var(--crema);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35;}
+
+/* PANTALLAS */
+.pantalla{display:none;min-height:100vh;}
+.pantalla.activa{display:flex;flex-direction:column;}
+
+/* HEADER */
+.brb-header{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2.5rem;border-bottom:1px solid rgba(200,168,75,.2);background:rgba(10,10,10,.95);position:sticky;top:0;z-index:100;}
+.brb-logo{font-family:var(--font-display);font-size:1.1rem;font-weight:600;letter-spacing:.08em;color:var(--oro);}
+.brb-logo span{color:var(--crema);font-weight:300;font-style:italic;}
+.header-tag{font-family:var(--font-mono);font-size:.65rem;color:var(--gris-light);letter-spacing:.12em;text-transform:uppercase;}
+.user-email{font-family:var(--font-mono);font-size:.6rem;color:var(--gris-light);}
+.btn-logout{background:transparent;border:1px solid #2a2a2a;color:#555;font-family:var(--font-mono);font-size:.6rem;padding:.3rem .8rem;cursor:pointer;letter-spacing:.08em;transition:all .2s;}
+.btn-logout:hover{border-color:var(--error);color:var(--error);}
+
+/* BOTONES */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.8rem;font-family:var(--font-mono);font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-primary{background:var(--oro);color:var(--negro);clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+.btn-primary:hover{background:var(--oro-light);transform:translateY(-1px);}
+.btn-secondary{background:transparent;color:var(--oro);border:1px solid var(--oro-dim);clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+.btn-secondary:hover{border-color:var(--oro);background:rgba(200,168,75,.08);}
+.btn-ghost{background:transparent;color:var(--gris-light);border:1px solid #333;}
+.btn-ghost:hover{color:var(--crema);border-color:#555;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-sm{padding:.5rem 1.1rem;font-size:.65rem;}
+.btn-danger{background:var(--error);color:white;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+
+/* INPUTS */
+.field{display:flex;flex-direction:column;gap:.4rem;}
+.field label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--oro-dim);}
+.field input,.field select,.field textarea{background:#111;border:1px solid #2a2a2a;color:var(--crema);padding:.75rem 1rem;font-family:var(--font-body);font-size:.9rem;outline:none;transition:border-color .2s;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--oro-dim);}
+.field input::placeholder,.field textarea::placeholder{color:#444;font-style:italic;}
+.field select option{background:#111;}
+.field textarea{resize:vertical;min-height:100px;line-height:1.6;}
+
+/* ── LOGIN ── */
+#p-login{background:var(--negro);justify-content:center;align-items:center;padding:2rem 1rem;}
+.login-wrap{max-width:420px;width:100%;display:flex;flex-direction:column;gap:2rem;}
+.login-brand{text-align:center;}
+.brand-mark{font-family:var(--font-display);font-size:3rem;font-weight:700;color:var(--oro);display:block;line-height:1;}
+.brand-sub{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gris-light);margin-top:.3rem;}
+.brand-divider{width:40px;height:1px;background:var(--oro-dim);margin:.6rem auto;}
+.brand-product{font-family:var(--font-display);font-size:1.4rem;font-weight:300;color:var(--crema);font-style:italic;}
+.login-box{background:#0d0d0d;border:1px solid #1e1e1e;border-top:2px solid var(--oro-dim);padding:2rem;display:flex;flex-direction:column;gap:1.2rem;}
+.login-title{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gris-light);text-align:center;}
+.login-err{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);color:#e74c3c;font-family:var(--font-mono);font-size:.7rem;padding:.75rem 1rem;display:none;line-height:1.5;}
+.key-wrap{position:relative;}
+.key-wrap input{padding-right:3rem;}
+.eye-btn{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gris-light);cursor:pointer;font-size:.8rem;}
+.eye-btn:hover{color:var(--oro);}
+.login-footer{text-align:center;font-family:var(--font-mono);font-size:.55rem;color:#333;line-height:1.8;}
+.login-footer a{color:var(--oro-dim);text-decoration:none;}
+
+/* ── API KEY ── */
+#p-apikey{background:var(--negro);justify-content:center;align-items:center;padding:3rem 1rem;}
+.apikey-wrap{max-width:640px;width:100%;}
+.apikey-hero{text-align:center;margin-bottom:3rem;}
+.apikey-hero .eyebrow{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);margin-bottom:1rem;}
+.apikey-hero h1{font-family:var(--font-display);font-size:3rem;font-weight:300;line-height:1.1;color:var(--crema);margin-bottom:.75rem;}
+.apikey-hero h1 em{color:var(--oro);font-style:italic;}
+.apikey-hero p{color:var(--gris-light);font-size:.9rem;line-height:1.6;}
+.steps-guide{background:#0d0d0d;border:1px solid #1e1e1e;border-left:3px solid var(--oro-dim);padding:1.5rem;margin-bottom:2rem;}
+.guide-title{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oro);margin-bottom:1.2rem;}
+.step-item{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;}
+.step-item:last-child{margin-bottom:0;}
+.step-num{font-family:var(--font-mono);font-size:.65rem;font-weight:500;color:var(--oro);background:rgba(200,168,75,.1);border:1px solid var(--oro-dim);width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.step-text{font-size:.85rem;color:var(--crema-dark);line-height:1.5;}
+.step-text a{color:var(--oro);text-decoration:none;border-bottom:1px solid var(--oro-dim);}
+.step-text code{font-family:var(--font-mono);font-size:.78rem;background:#1a1a1a;border:1px solid #2a2a2a;padding:.1rem .4rem;color:var(--oro-light);}
+.apikey-form{display:flex;flex-direction:column;gap:1.2rem;}
+.key-status{display:flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.7rem;padding:.5rem .75rem;background:#0d0d0d;border:1px solid #1e1e1e;}
+.key-status.valid{color:var(--success);border-color:rgba(26,122,74,.3);}
+.key-status.invalid{color:var(--error);border-color:rgba(192,57,43,.3);}
+.key-status.checking{color:var(--gris-light);}
+
+/* ── WIZARD ── */
+#p-wizard{background:var(--negro);}
+.wizard-layout{flex:1;display:flex;flex-direction:column;max-width:760px;margin:0 auto;padding:3rem 1.5rem;width:100%;}
+.wizard-progress{display:flex;gap:0;margin-bottom:3rem;position:relative;}
+.wizard-progress::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#1e1e1e;transform:translateY(-50%);z-index:0;}
+.w-step{display:flex;flex-direction:column;align-items:center;gap:.5rem;flex:1;position:relative;z-index:1;}
+.w-dot{width:32px;height:32px;background:var(--gris);border:2px solid #333;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.7rem;color:#555;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);transition:all .3s;}
+.w-step.activo .w-dot{background:var(--oro);border-color:var(--oro);color:var(--negro);}
+.w-step.hecho .w-dot{background:var(--navy);border-color:var(--navy-mid);color:var(--oro);}
+.w-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:#444;text-align:center;transition:color .3s;}
+.w-step.activo .w-label{color:var(--oro);}
+.w-step.hecho .w-label{color:var(--navy-mid);}
+.wpanel{display:none;flex-direction:column;gap:1.5rem;animation:fadeUp .3s ease;}
+.wpanel.activo{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.wizard-title{font-family:var(--font-display);font-size:2rem;font-weight:300;color:var(--crema);line-height:1.2;}
+.wizard-title em{color:var(--oro);font-style:italic;}
+.wizard-sub{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gris-light);margin-top:-1rem;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.card-opt{background:#0d0d0d;border:1px solid #1e1e1e;padding:1.2rem;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:.5rem;}
+.card-opt:hover{border-color:var(--oro-dim);background:#111;}
+.card-opt.sel{border-color:var(--oro);background:rgba(200,168,75,.06);}
+.card-opt .ci{font-size:1.5rem;line-height:1;}
+.card-opt .cl{font-family:var(--font-body);font-size:.85rem;font-weight:500;color:var(--crema);line-height:1.3;}
+.card-opt .cd{font-family:var(--font-mono);font-size:.6rem;color:var(--gris-light);letter-spacing:.05em;}
+.card-opt.sel .cl{color:var(--oro);}
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1.5rem;border-top:1px solid #1a1a1a;}
+.upload-zone{border:2px dashed #2a2a2a;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:#080808;position:relative;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--oro-dim);background:#0d0d0d;}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:2rem;margin-bottom:.5rem;opacity:.5;}
+.upload-label{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;color:var(--gris-light);}
+.upload-formats{font-family:var(--font-mono);font-size:.6rem;color:#444;margin-top:.3rem;}
+.file-loaded{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:rgba(26,58,107,.2);border:1px solid rgba(200,168,75,.2);margin-top:.5rem;}
+.file-loaded-name{font-family:var(--font-mono);font-size:.72rem;color:var(--oro);}
+.file-loaded-info{font-family:var(--font-mono);font-size:.6rem;color:var(--gris-light);}
+
+/* ── APP PRINCIPAL ── */
+#p-app{background:var(--negro);flex-direction:column;}
+.app-layout{flex:1;display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 60px);}
+.sidebar{background:#080808;border-right:1px solid #1a1a1a;display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-header{padding:1.2rem 1.5rem;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;justify-content:space-between;}
+.sidebar-title{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--oro);}
+.sidebar-actions{display:flex;gap:.4rem;}
+.sidebar-content{flex:1;overflow-y:auto;padding:1rem;}
+.sidebar-content::-webkit-scrollbar{width:4px;}
+.sidebar-content::-webkit-scrollbar-thumb{background:#2a2a2a;}
+.index-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:200px;gap:1rem;opacity:.4;}
+.index-ph-icon{font-size:2.5rem;}
+.index-ph-text{font-family:var(--font-mono);font-size:.65rem;text-align:center;color:var(--gris-light);letter-spacing:.1em;}
+.idx-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .5rem;border-bottom:1px solid #111;cursor:pointer;transition:background .15s;}
+.idx-item:hover{background:#0d0d0d;}
+.idx-item.activo{background:rgba(200,168,75,.06);}
+.idx-item.sub{padding-left:1.5rem;}
+.idx-item.sub .idx-name{font-size:.75rem;color:#aaa;}
+.idx-num{font-family:var(--font-mono);font-size:.6rem;color:var(--oro-dim);min-width:24px;flex-shrink:0;}
+.idx-name{font-size:.8rem;color:var(--crema);flex:1;line-height:1.3;}
+.idx-status{font-size:.65rem;flex-shrink:0;}
+.idx-status.ok{color:var(--success);}
+.idx-status.spin{color:var(--oro);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.idx-edit{display:none;width:100%;background:#0a0a0a;border:1px solid var(--oro-dim);color:var(--crema);font-family:var(--font-mono);font-size:.72rem;padding:.75rem;resize:none;min-height:300px;line-height:1.8;outline:none;}
+.main-panel{display:flex;flex-direction:column;overflow:hidden;}
+.main-toolbar{padding:.9rem 1.5rem;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:#080808;flex-wrap:wrap;}
+.toolbar-left{display:flex;align-items:center;gap:1rem;}
+.work-title{font-family:var(--font-display);font-size:1.1rem;font-weight:400;color:var(--crema);font-style:italic;}
+.work-meta{font-family:var(--font-mono);font-size:.6rem;color:var(--gris-light);letter-spacing:.1em;}
+.toolbar-right{display:flex;align-items:center;gap:.5rem;}
+.content-area{flex:1;overflow-y:auto;padding:2rem;display:flex;flex-direction:column;gap:1.5rem;}
+.content-area::-webkit-scrollbar{width:4px;}
+.content-area::-webkit-scrollbar-thumb{background:#2a2a2a;}
+.welcome-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;text-align:center;padding:3rem;animation:fadeIn .5s .2s both;}
+@keyframes fadeIn{to{opacity:1}}
+.welcome-state h2{font-family:var(--font-display);font-size:2.5rem;font-weight:300;color:var(--crema);line-height:1.2;}
+.welcome-state h2 em{color:var(--oro);font-style:italic;}
+.welcome-state p{color:var(--gris-light);max-width:500px;line-height:1.6;font-size:.9rem;}
+.section-card{background:#0d0d0d;border:1px solid #1e1e1e;animation:fadeUp .3s ease;}
+.section-card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid #1a1a1a;cursor:pointer;}
+.section-card-title{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--oro);}
+.section-card-actions{display:flex;gap:.4rem;}
+.section-card-body{padding:1.2rem;}
+.section-text{font-family:var(--font-body);font-size:.9rem;line-height:1.8;color:var(--crema-dark);white-space:pre-wrap;}
+.gen-btn-placeholder{width:100%;padding:1rem;display:flex;align-items:center;justify-content:center;gap:.75rem;background:transparent;border:1px dashed #2a2a2a;color:var(--gris-light);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.gen-btn-placeholder:hover{border-color:var(--oro-dim);color:var(--oro);background:rgba(200,168,75,.03);}
+.gen-loading{display:flex;align-items:center;gap:1rem;padding:2rem;font-family:var(--font-mono);font-size:.72rem;color:var(--gris-light);border:1px solid #1a1a1a;background:#080808;}
+.loading-bar{flex:1;height:2px;background:#1a1a1a;overflow:hidden;}
+.loading-bar-inner{height:100%;background:var(--oro);animation:loadBar 1.5s ease-in-out infinite;}
+@keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.progress-bar-container{padding:.75rem 1.5rem;border-bottom:1px solid #111;background:#060606;display:flex;align-items:center;gap:1rem;}
+.progress-label{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;color:var(--gris-light);white-space:nowrap;}
+.progress-track{flex:1;height:3px;background:#1a1a1a;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--navy-mid),var(--oro));transition:width .5s ease;width:0%;}
+.progress-pct{font-family:var(--font-mono);font-size:.6rem;color:var(--oro);white-space:nowrap;}
+.config-chips{display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem 1.5rem;border-bottom:1px solid #111;background:#060606;}
+.chip{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.08em;padding:.25rem .6rem;background:rgba(27,58,107,.3);border:1px solid rgba(37,77,140,.4);color:var(--crema-dark);clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.word-count{font-family:var(--font-mono);font-size:.58rem;color:var(--gris-light);padding:.2rem .5rem;background:#111;border:1px solid #1e1e1e;}
+.toast{position:fixed;bottom:2rem;right:2rem;padding:.75rem 1.2rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;z-index:10000;transform:translateY(100px);transition:transform .3s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+.toast.show{transform:translateY(0);}
+.toast.success{background:var(--success);color:white;}
+.toast.error{background:var(--error);color:white;}
+.toast.info{background:var(--navy);color:var(--oro);border:1px solid var(--oro-dim);}
+#p-loading{background:var(--negro);justify-content:center;align-items:center;flex-direction:column;gap:1.5rem;}
+.loading-logo{font-family:var(--font-display);font-size:3rem;font-weight:700;color:var(--oro);animation:breathe 2s ease-in-out infinite;}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.4}}
+.loading-msg{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;color:var(--gris-light);text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="p-loading" class="pantalla activa">
+  <div class="loading-logo">BRB</div>
+  <div class="loading-msg" id="loading-msg">Iniciando...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="p-login" class="pantalla">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <span class="brand-mark">BRB</span>
+      <div class="brand-sub">Estrategia &amp; Procesos</div>
+      <div class="brand-divider"></div>
+      <div class="brand-product">Generador de Tesis</div>
+    </div>
+    <div class="login-box">
+      <div class="login-title">Acceso al sistema</div>
+      <div class="login-err" id="login-err"></div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="li-email" placeholder="usuario@correo.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Clave de acceso</label>
+        <div class="key-wrap">
+          <input type="password" id="li-clave" placeholder="BRB-TES-2026-XX01" autocomplete="off" />
+          <button class="eye-btn" onclick="toggleEye('li-clave',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="login()" id="btn-login" style="width:100%;justify-content:center">Ingresar →</button>
+    </div>
+    <div class="login-footer">
+      Para obtener acceso contactá al administrador<br>
+      <a href="mailto:bbbarrera1986@gmail.com">bbbarrera1986@gmail.com</a><br><br>
+      <span style="color:var(--oro-dim)">Boris Rodríguez Barrera</span><br>
+      ORCID 0009-0004-6583-6439 · Puerto Madryn, Chubut, Argentina<br>
+      BRB Estrategia &amp; Procesos · Soberanía Técnica Ediciones<br>
+      <span style="color:#2a2a2a">Generador de Tesis — 6.° herramienta del ecosistema BRB IA</span>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY -->
+<div id="p-apikey" class="pantalla">
+  <div class="apikey-wrap">
+    <div class="apikey-hero">
+      <div class="eyebrow">BRB Estrategia &amp; Procesos</div>
+      <h1>Configurá tu<br><em>API Key</em></h1>
+      <p>La herramienta usa tu propia clave de Google Gemini. Es gratuita y el costo de uso corre por tu cuenta directamente con Google.</p>
+    </div>
+    <div class="steps-guide">
+      <div class="guide-title">¿Cómo obtener tu API Key gratuita?</div>
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">Accedé a <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> con tu cuenta Google.</div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">Hacé clic en <code>Create API key</code> y seleccioná un proyecto.</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Copiá la key generada — comienza con <code>AIza...</code> — y pegala abajo.</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Incluye hasta <code>250 requests/día</code> gratis con Gemini 2.5 Flash.</div></div>
+    </div>
+    <div class="apikey-form">
+      <div class="field">
+        <label>Tu API Key de Gemini</label>
+        <div class="key-wrap">
+          <input type="password" id="apikey-input" placeholder="AIzaSy..." autocomplete="off" />
+          <button class="eye-btn" onclick="toggleEye('apikey-input',this)">👁</button>
+        </div>
+      </div>
+      <div id="key-status" class="key-status" style="display:none"></div>
+      <button class="btn btn-primary" onclick="validarKey()" id="btn-validar-key">Validar y Continuar →</button>
+      <p style="font-family:var(--font-mono);font-size:.6rem;color:#444;text-align:center;line-height:1.6">La key se guarda localmente en tu navegador. No se envía a ningún servidor excepto directamente a Google.</p>
+    </div>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<div id="p-wizard" class="pantalla">
+  <header class="brb-header">
+    <div class="brb-logo">BRB <span>Generador de Tesis</span></div>
+    <div class="header-tag">Configuración del trabajo</div>
+  </header>
+  <div class="wizard-layout">
+    <div class="wizard-progress">
+      <div class="w-step activo" id="ws-1"><div class="w-dot">1</div><div class="w-label">Tipo</div></div>
+      <div class="w-step" id="ws-2"><div class="w-dot">2</div><div class="w-label">Datos</div></div>
+      <div class="w-step" id="ws-3"><div class="w-dot">3</div><div class="w-label">Estructura</div></div>
+      <div class="w-step" id="ws-4"><div class="w-dot">4</div><div class="w-label">Contexto</div></div>
+    </div>
+
+    <!-- PASO 1 -->
+    <div class="wpanel activo" id="wp-1">
+      <div class="wizard-sub">Paso 1 de 4</div>
+      <div class="wizard-title">¿Qué tipo de<br><em>trabajo elaborás?</em></div>
+      <div class="card-grid">
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Tesis de grado" onclick="selCard(this)"><div class="ci">🎓</div><div class="cl">Tesis de Grado</div><div class="cd">Universitario / Licenciatura</div></div>
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Trabajo final de tecnicatura" onclick="selCard(this)"><div class="ci">⚙️</div><div class="cl">Trabajo Final de Tecnicatura</div><div class="cd">Nivel terciario técnico</div></div>
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Monografía" onclick="selCard(this)"><div class="ci">📄</div><div class="cl">Monografía</div><div class="cd">Exploración temática</div></div>
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Trabajo de investigación escolar" onclick="selCard(this)"><div class="ci">📚</div><div class="cl">Investigación Escolar</div><div class="cd">Nivel secundario</div></div>
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Informe técnico" onclick="selCard(this)"><div class="ci">📊</div><div class="cl">Informe Técnico</div><div class="cd">Aplicado / profesional</div></div>
+        <div class="card-opt" data-f="tipo_trabajo" data-v="Tesis de posgrado" onclick="selCard(this)"><div class="ci">🔬</div><div class="cl">Tesis de Posgrado</div><div class="cd">Maestría / Doctorado</div></div>
+      </div>
+      <div class="wizard-nav"><div></div><button class="btn btn-primary" onclick="wNext(1)">Siguiente →</button></div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="wpanel" id="wp-2">
+      <div class="wizard-sub">Paso 2 de 4</div>
+      <div class="wizard-title">Datos del<br><em>trabajo</em></div>
+      <div class="field"><label>Título o tema tentativo</label><input type="text" id="titulo-tema" placeholder="Ej: Análisis de la calidad microbiológica en plantas procesadoras de merluza..." /></div>
+      <div class="field">
+        <label>Área disciplinar</label>
+        <div class="card-grid grid-2">
+          <div class="card-opt" data-f="area_disciplinar" data-v="ciencias naturales y exactas" onclick="selCard(this)"><div class="ci">🧬</div><div class="cl">Ciencias Naturales y Exactas</div></div>
+          <div class="card-opt" data-f="area_disciplinar" data-v="ciencias sociales y humanidades" onclick="selCard(this)"><div class="ci">🌐</div><div class="cl">Ciencias Sociales y Humanidades</div></div>
+          <div class="card-opt" data-f="area_disciplinar" data-v="ingeniería y tecnología" onclick="selCard(this)"><div class="ci">⚙️</div><div class="cl">Ingeniería y Tecnología</div></div>
+          <div class="card-opt" data-f="area_disciplinar" data-v="ciencias de la salud" onclick="selCard(this)"><div class="ci">🏥</div><div class="cl">Ciencias de la Salud</div></div>
+          <div class="card-opt" data-f="area_disciplinar" data-v="educación y pedagogía" onclick="selCard(this)"><div class="ci">📐</div><div class="cl">Educación y Pedagogía</div></div>
+          <div class="card-opt" data-f="area_disciplinar" data-v="ciencias económicas y administrativas" onclick="selCard(this)"><div class="ci">📈</div><div class="cl">Ciencias Económicas</div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Nivel educativo</label>
+        <div class="card-grid">
+          <div class="card-opt" data-f="nivel_educativo" data-v="secundario" onclick="selCard(this)"><div class="cl">Secundario</div></div>
+          <div class="card-opt" data-f="nivel_educativo" data-v="terciario" onclick="selCard(this)"><div class="cl">Terciario</div></div>
+          <div class="card-opt" data-f="nivel_educativo" data-v="universitario de grado" onclick="selCard(this)"><div class="cl">Universitario Grado</div></div>
+          <div class="card-opt" data-f="nivel_educativo" data-v="posgrado" onclick="selCard(this)"><div class="cl">Posgrado</div></div>
+        </div>
+      </div>
+      <div class="wizard-nav"><button class="btn btn-ghost" onclick="wPrev(2)">← Anterior</button><button class="btn btn-primary" onclick="wNext(2)">Siguiente →</button></div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="wpanel" id="wp-3">
+      <div class="wizard-sub">Paso 3 de 4</div>
+      <div class="wizard-title">Estructura<br><em>del documento</em></div>
+      <div class="field">
+        <label>Extensión estimada</label>
+        <div class="card-grid">
+          <div class="card-opt" data-f="extension" data-v="corta" onclick="selCard(this)"><div class="ci">📄</div><div class="cl">Corta</div><div class="cd">10–20 págs · 300 pal/sec</div></div>
+          <div class="card-opt" data-f="extension" data-v="media" onclick="selCard(this)"><div class="ci">📑</div><div class="cl">Media</div><div class="cd">20–50 págs · 600 pal/sec</div></div>
+          <div class="card-opt" data-f="extension" data-v="extensa" onclick="selCard(this)"><div class="ci">📚</div><div class="cl">Extensa</div><div class="cd">+50 págs · 1000 pal/sec</div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Estilo de cita</label>
+        <div class="card-grid">
+          <div class="card-opt" data-f="estilo_cita" data-v="APA 7ma edición" onclick="selCard(this)"><div class="cl">APA 7</div><div class="cd">Ciencias sociales</div></div>
+          <div class="card-opt" data-f="estilo_cita" data-v="Vancouver" onclick="selCard(this)"><div class="cl">Vancouver</div><div class="cd">Ciencias de la salud</div></div>
+          <div class="card-opt" data-f="estilo_cita" data-v="Chicago" onclick="selCard(this)"><div class="cl">Chicago</div><div class="cd">Humanidades</div></div>
+          <div class="card-opt" data-f="estilo_cita" data-v="ICONTEC" onclick="selCard(this)"><div class="cl">ICONTEC</div><div class="cd">Norma colombiana</div></div>
+          <div class="card-opt" data-f="estilo_cita" data-v="sin estilo de cita específico" onclick="selCard(this)"><div class="cl">Sin estilo</div><div class="cd">Libre</div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Idioma</label>
+        <div class="card-grid grid-2">
+          <div class="card-opt sel" data-f="idioma" data-v="español" onclick="selCard(this)"><div class="ci">🇦🇷</div><div class="cl">Español</div></div>
+          <div class="card-opt" data-f="idioma" data-v="inglés" onclick="selCard(this)"><div class="ci">🇺🇸</div><div class="cl">Inglés</div></div>
+        </div>
+      </div>
+      <div class="wizard-nav"><button class="btn btn-ghost" onclick="wPrev(3)">← Anterior</button><button class="btn btn-primary" onclick="wNext(3)">Siguiente →</button></div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="wpanel" id="wp-4">
+      <div class="wizard-sub">Paso 4 de 4 — Opcional</div>
+      <div class="wizard-title">Contexto<br><em>adicional</em></div>
+      <div class="field"><label>Descripción del problema, hipótesis o pregunta central</label><textarea id="ctx-adicional" placeholder="Describí tu problema de investigación, hipótesis tentativa, o cualquier dato específico..." rows="5"></textarea></div>
+      <div class="field">
+        <label>Adjuntar documento base (PDF o DOCX)</label>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" accept=".pdf,.doc,.docx" onchange="handleFile(event)" />
+          <div class="upload-icon">📎</div>
+          <div class="upload-label">Arrastrá o hacé clic para subir</div>
+          <div class="upload-formats">PDF · DOC · DOCX — máx. 15.000 caracteres</div>
+        </div>
+        <div id="file-loaded" style="display:none" class="file-loaded">
+          <div><div class="file-loaded-name" id="file-name"></div><div class="file-loaded-info" id="file-chars"></div></div>
+          <button class="btn btn-sm btn-ghost" onclick="clearFile()">✕ Quitar</button>
+        </div>
+      </div>
+      <div class="wizard-nav"><button class="btn btn-ghost" onclick="wPrev(4)">← Anterior</button><button class="btn btn-primary" onclick="iniciarApp()">Generar Estructura →</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="p-app" class="pantalla">
+  <header class="brb-header">
+    <div class="brb-logo">BRB <span>Generador de Tesis</span></div>
+    <div style="display:flex;gap:.75rem;align-items:center">
+      <div class="user-email" id="hdr-email"></div>
+      <button class="btn btn-ghost btn-sm" onclick="irWizard()">⚙ Reconfigurar</button>
+      <button class="btn btn-ghost btn-sm" onclick="nuevaSesion()">✕ Nueva</button>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </header>
+  <div class="config-chips" id="config-chips"></div>
+  <div class="progress-bar-container">
+    <div class="progress-label">PROGRESO</div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="progress-pct" id="prog-pct">0%</div>
+  </div>
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Índice del Trabajo</div>
+        <div class="sidebar-actions">
+          <button class="btn btn-sm btn-secondary" id="btn-edit-idx" onclick="toggleEditIdx()">✏ Editar</button>
+          <button class="btn btn-sm btn-primary" id="btn-gen-all" onclick="generarTodo()" style="display:none">⚡ Todo</button>
+        </div>
+      </div>
+      <div class="sidebar-content" id="sidebar-content">
+        <div class="index-ph"><div class="index-ph-icon">📋</div><div class="index-ph-text">El índice aparecerá<br>aquí tras generar<br>la estructura</div></div>
+      </div>
+      <textarea class="idx-edit" id="idx-edit" placeholder="Editá el índice. Un ítem por línea."></textarea>
+      <div id="edit-controls" style="padding:.75rem;border-top:1px solid #1a1a1a;display:none">
+        <button class="btn btn-sm btn-primary" onclick="aplicarEditIdx()" style="width:100%;justify-content:center">✓ Aplicar cambios</button>
+      </div>
+    </div>
+    <div class="main-panel">
+      <div class="main-toolbar">
+        <div class="toolbar-left"><div><div class="work-title" id="work-title">—</div><div class="work-meta" id="work-meta">—</div></div></div>
+        <div class="toolbar-right">
+          <div class="word-count" id="total-words">0 palabras</div>
+          <button class="btn btn-sm btn-secondary" onclick="descargarTxt()" id="btn-dl" disabled>⬇ .txt</button>
+          <button class="btn btn-sm btn-primary" onclick="generarIndice()" id="btn-gen-idx">⚡ Generar Índice</button>
+        </div>
+      </div>
+      <div class="content-area" id="content-area">
+        <div class="welcome-state" id="welcome-state" style="opacity:0">
+          <h2>Listo para<br><em>comenzar</em></h2>
+          <p>Hacé clic en <strong style="color:var(--oro)">Generar Índice</strong> para crear la estructura completa. Luego generás cada sección individualmente o todas de una vez.</p>
+          <button class="btn btn-primary" onclick="generarIndice()">⚡ Generar Índice ahora</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// SUPABASE — REST directo (sin SDK)
+// ══════════════════════════════════════
+const SUPA_URL  = 'https://mjxtbtkhdsgzgvakgdrw.supabase.co';
+const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qeHRidGtoZHNnemd2YWtnZHJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTcsImV4cCI6MjA5MTc5Mzg5N30.Q-Sg6aKScnOXlAyzY7hzfKUPUXJwf5teh3fMhTF-CeM';
+const hdrs = { 'apikey': SUPA_ANON, 'Authorization': `Bearer ${SUPA_ANON}`, 'Content-Type': 'application/json' };
+
+async function supaFetch(path, opts = {}) {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: hdrs, ...opts });
+  if (!r.ok) { const e = await r.json().catch(()=>({message:r.status})); throw new Error(e.message || r.status); }
+  return r.json().catch(() => null);
+}
+
+// ══════════════════════════════════════
+// GEMINI
+// ══════════════════════════════════════
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const WORD_COUNTS = { corta: 300, media: 600, extensa: 1000 };
+
+// ══════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════
+const S = {
+  licenciaId: null, perfilId: null, email: '',
+  apiKey: '',
+  config: { tipo_trabajo:'', titulo_tema:'', area_disciplinar:'', nivel_educativo:'', extension:'', estilo_cita:'', idioma:'español', contexto_adicional:'', doc_base_text:'', doc_base_name:'' },
+  indexSections: [],
+  generatedSections: {},
+  isGenerating: false
+};
+
+// ══════════════════════════════════════
+// HUELLA DISPOSITIVO
+// ══════════════════════════════════════
+function huella() {
+  const s = `${navigator.userAgent}${navigator.language}${screen.width}x${screen.height}${screen.colorDepth}${Intl.DateTimeFormat().resolvedOptions().timeZone}${navigator.hardwareConcurrency}`;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+  return 'TES-' + Math.abs(h).toString(36).toUpperCase();
+}
+
+// ══════════════════════════════════════
+// PANTALLAS
+// ══════════════════════════════════════
+function mostrar(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+}
+
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
+function toggleEye(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+async function login() {
+  const email = document.getElementById('li-email').value.trim().toLowerCase();
+  const clave = document.getElementById('li-clave').value.trim().toUpperCase();
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if (!email || !clave) { errEl.textContent = 'Completá email y clave.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+
+  try {
+    const rows = await supaFetch(`licencias_tesis?email=eq.${encodeURIComponent(email)}&select=*`);
+    if (!rows || !rows.length) throw new Error('Email no registrado.');
+    const lic = rows[0];
+    if (lic.clave.toUpperCase() !== clave) throw new Error('Clave incorrecta.');
+    if (!lic.activa) throw new Error('Licencia inactiva. Contactá a BRB.');
+    if (lic.fecha_vencimiento && new Date(lic.fecha_vencimiento) < new Date()) throw new Error('Licencia vencida. Contactá a BRB.');
+
+    const h = huella();
+    if (!lic.dispositivo_id) {
+      await supaFetch(`licencias_tesis?id=eq.${lic.id}`, { method:'PATCH', body: JSON.stringify({ dispositivo_id: h }) });
+    } else if (lic.dispositivo_id !== h) {
+      throw new Error('Este usuario ya tiene un dispositivo registrado. Si cambiaste de equipo, contactá a BRB para resetear.');
+    }
+
+    S.licenciaId = lic.id;
+    S.email = email;
+    document.getElementById('hdr-email').textContent = email;
+
+    // Cargar perfil guardado
+    const perfs = await supaFetch(`perfiles_tesis?licencia_id=eq.${lic.id}&select=*`);
+    if (perfs && perfs.length) {
+      const p = perfs[0];
+      S.perfilId = p.id;
+      S.config = {
+        tipo_trabajo: p.tipo_trabajo || '', titulo_tema: p.titulo_tema || '',
+        area_disciplinar: p.area_disciplinar || '', nivel_educativo: p.nivel_educativo || '',
+        extension: p.extension || '', estilo_cita: p.estilo_cita || '',
+        idioma: p.idioma || 'español', contexto_adicional: p.contexto_adicional || '',
+        doc_base_text: p.doc_base_texto || '', doc_base_name: p.doc_base_nombre || ''
+      };
+      S.indexSections = p.indice_secciones || [];
+      S.generatedSections = p.secciones_generadas || {};
+    }
+
+    // Verificar API key
+    const savedKey = localStorage.getItem('brb_gemini_key_' + lic.id);
+    if (savedKey) {
+      S.apiKey = savedKey;
+      if (S.config.titulo_tema) { mostrar('p-app'); renderApp(); }
+      else { mostrar('p-wizard'); }
+    } else {
+      mostrar('p-apikey');
+    }
+
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Ingresar →';
+  }
+}
+
+function logout() {
+  S.licenciaId = null; S.email = ''; S.apiKey = '';
+  S.indexSections = []; S.generatedSections = {}; S.perfilId = null;
+  mostrar('p-login');
+}
+
+// ══════════════════════════════════════
+// GUARDADO SUPABASE
+// ══════════════════════════════════════
+let saveTimer = null;
+function triggerSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(guardarPerfil, 2000);
+}
+
+async function guardarPerfil() {
+  if (!S.licenciaId) return;
+  const payload = {
+    licencia_id: S.licenciaId,
+    tipo_trabajo: S.config.tipo_trabajo, titulo_tema: S.config.titulo_tema,
+    area_disciplinar: S.config.area_disciplinar, nivel_educativo: S.config.nivel_educativo,
+    extension: S.config.extension, estilo_cita: S.config.estilo_cita,
+    idioma: S.config.idioma, contexto_adicional: S.config.contexto_adicional,
+    doc_base_nombre: S.config.doc_base_name, doc_base_texto: S.config.doc_base_text,
+    indice_secciones: S.indexSections, secciones_generadas: S.generatedSections,
+    updated_at: new Date().toISOString()
+  };
+  try {
+    if (S.perfilId) {
+      await supaFetch(`perfiles_tesis?id=eq.${S.perfilId}`, { method:'PATCH', body: JSON.stringify(payload) });
+    } else {
+      const r = await supaFetch('perfiles_tesis', { method:'POST', body: JSON.stringify(payload), headers: { ...hdrs, 'Prefer':'return=representation' } });
+      if (r && r[0]) S.perfilId = r[0].id;
+    }
+  } catch(e) { console.error('Error guardando:', e); }
+}
+
+// ══════════════════════════════════════
+// API KEY
+// ══════════════════════════════════════
+async function validarKey() {
+  const key = document.getElementById('apikey-input').value.trim();
+  if (!key || !key.startsWith('AIza')) { showKeyStatus('La key debe comenzar con "AIza..."', 'invalid'); return; }
+  const btn = document.getElementById('btn-validar-key');
+  btn.disabled = true; btn.textContent = 'Validando...';
+  showKeyStatus('Verificando con Gemini API...', 'checking');
+  try {
+    const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{role:'user',parts:[{text:'OK'}]}], generationConfig:{maxOutputTokens:5} })
+    });
+    if (!res.ok) throw new Error('Key inválida');
+    S.apiKey = key;
+    localStorage.setItem('brb_gemini_key_' + S.licenciaId, key);
+    showKeyStatus('✓ Conectado a Gemini 2.5 Flash', 'valid');
+    setTimeout(() => {
+      if (S.config.titulo_tema) { mostrar('p-app'); renderApp(); }
+      else mostrar('p-wizard');
+    }, 800);
+  } catch(e) {
+    showKeyStatus('✗ Key inválida o sin acceso', 'invalid');
+    btn.disabled = false; btn.textContent = 'Validar y Continuar →';
+  }
+}
+
+function showKeyStatus(msg, type) {
+  const el = document.getElementById('key-status');
+  el.style.display = 'flex'; el.className = 'key-status ' + type; el.textContent = msg;
+}
+
+// ══════════════════════════════════════
+// WIZARD
+// ══════════════════════════════════════
+function selCard(el) {
+  const f = el.dataset.f, v = el.dataset.v;
+  document.querySelectorAll(`[data-f="${f}"]`).forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.config[f] = v;
+}
+
+function wNext(step) {
+  if (step === 1 && !S.config.tipo_trabajo) { toast('Seleccioná un tipo de trabajo','error'); return; }
+  if (step === 2) {
+    const t = document.getElementById('titulo-tema').value.trim();
+    if (!t) { toast('Ingresá un título o tema','error'); return; }
+    if (!S.config.area_disciplinar) { toast('Seleccioná el área disciplinar','error'); return; }
+    if (!S.config.nivel_educativo) { toast('Seleccioná el nivel educativo','error'); return; }
+    S.config.titulo_tema = t;
+  }
+  if (step === 3) {
+    if (!S.config.extension) { toast('Seleccioná la extensión','error'); return; }
+    if (!S.config.estilo_cita) { toast('Seleccioná el estilo de cita','error'); return; }
+  }
+  document.getElementById(`ws-${step}`).classList.replace('activo','hecho');
+  document.getElementById(`ws-${step+1}`).classList.add('activo');
+  document.getElementById(`wp-${step}`).classList.remove('activo');
+  document.getElementById(`wp-${step+1}`).classList.add('activo');
+}
+
+function wPrev(step) {
+  document.getElementById(`ws-${step}`).classList.remove('activo');
+  document.getElementById(`ws-${step-1}`).classList.replace('hecho','activo');
+  document.getElementById(`wp-${step}`).classList.remove('activo');
+  document.getElementById(`wp-${step-1}`).classList.add('activo');
+}
+
+// ── ARCHIVO ──
+async function handleFile(event) {
+  const file = event.target.files[0]; if (!file) return;
+  toast('Procesando documento...','info');
+  try {
+    let text = '';
+    if (file.name.endsWith('.pdf')) text = await extractPDF(file);
+    else text = await extractDOCX(file);
+    if (text.length > 15000) { text = text.substring(0,15000); toast('Recortado a 15.000 caracteres','info'); }
+    S.config.doc_base_text = text; S.config.doc_base_name = file.name;
+    document.getElementById('file-loaded').style.display = 'flex';
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-chars').textContent = `${text.length.toLocaleString()} caracteres`;
+    document.getElementById('upload-zone').style.display = 'none';
+    toast('Documento cargado','success');
+  } catch(e) { toast('Error: ' + e.message,'error'); }
+}
+
+async function extractPDF(file) {
+  const lib = window['pdfjs-dist/build/pdf'];
+  if (lib) lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const ab = await file.arrayBuffer();
+  const pdf = await lib.getDocument({data:ab}).promise;
+  let text = '';
+  for (let i = 1; i <= Math.min(pdf.numPages,30); i++) {
+    const page = await pdf.getPage(i);
+    const c = await page.getTextContent();
+    text += c.items.map(x=>x.str).join(' ') + '\n';
+  }
+  return text;
+}
+
+async function extractDOCX(file) {
+  const ab = await file.arrayBuffer();
+  const r = await mammoth.extractRawText({arrayBuffer:ab});
+  return r.value;
+}
+
+function clearFile() {
+  S.config.doc_base_text = ''; S.config.doc_base_name = '';
+  document.getElementById('file-loaded').style.display = 'none';
+  document.getElementById('upload-zone').style.display = 'block';
+  document.querySelector('#upload-zone input').value = '';
+}
+
+function iniciarApp() {
+  S.config.contexto_adicional = document.getElementById('ctx-adicional').value.trim();
+  triggerSave();
+  mostrar('p-app'); renderApp();
+}
+
+// ══════════════════════════════════════
+// APP PRINCIPAL
+// ══════════════════════════════════════
+function renderApp() {
+  document.getElementById('work-title').textContent = S.config.titulo_tema || '—';
+  document.getElementById('work-meta').textContent = `${S.config.tipo_trabajo} · ${S.config.nivel_educativo} · ${S.config.area_disciplinar}`;
+  document.getElementById('hdr-email').textContent = S.email;
+  const chips = document.getElementById('config-chips');
+  chips.innerHTML = [S.config.tipo_trabajo, S.config.area_disciplinar, S.config.nivel_educativo,
+    S.config.extension ? `Extensión: ${S.config.extension}` : '', S.config.estilo_cita, S.config.idioma,
+    S.config.doc_base_name ? `📎 ${S.config.doc_base_name}` : '']
+    .filter(Boolean).map(c=>`<div class="chip">${c}</div>`).join('');
+  if (S.indexSections.length > 0) {
+    renderIndex(); renderSections(); updateProgress();
+    document.getElementById('welcome-state').style.display = 'none';
+    document.getElementById('btn-gen-all').style.display = 'flex';
+  } else {
+    document.getElementById('welcome-state').style.opacity = '1';
+  }
+  updateWordCount();
+}
+
+// ── GEMINI ──
+async function callGemini(prompt, system='') {
+  const body = {
+    contents:[{role:'user',parts:[{text:prompt}]}],
+    generationConfig:{temperature:.7,maxOutputTokens:8192}
+  };
+  if (system) body.systemInstruction = {parts:[{text:system}]};
+  const res = await fetch(`${GEMINI_URL}?key=${S.apiKey}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `Error ${res.status}`); }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function stripMD(text) {
+  return text.replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/#+\s*/g,'')
+    .replace(/_{1,2}(.+?)_{1,2}/g,'$1').replace(/`(.+?)`/g,'$1').trim();
+}
+
+// ── GENERAR ÍNDICE ──
+async function generarIndice() {
+  if (S.isGenerating) return;
+  S.isGenerating = true;
+  const btn = document.getElementById('btn-gen-idx');
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+  const ws = document.getElementById('welcome-state');
+  if (ws) ws.innerHTML = `<div class="gen-loading"><span>Generando estructura del trabajo</span><div class="loading-bar"><div class="loading-bar-inner"></div></div></div>`;
+
+  try {
+    const wc = WORD_COUNTS[S.config.extension] || 600;
+    const docCtx = S.config.doc_base_text ? `\n\nDOCUMENTO BASE:\n${S.config.doc_base_text}` : '';
+    const prompt = `Sos un metodólogo especializado en ${S.config.area_disciplinar}.\n\nGenerá el índice completo para una ${S.config.tipo_trabajo} titulada "${S.config.titulo_tema}" de nivel ${S.config.nivel_educativo}, extensión ${S.config.extension} (${wc} palabras por sección), con estilo de cita ${S.config.estilo_cita}, en ${S.config.idioma}.\n\n${S.config.contexto_adicional ? `Contexto: ${S.config.contexto_adicional}` : ''}${docCtx}\n\nINSTRUCCIONES DE FORMATO ESTRICTAS:\n- Texto plano sin asteriscos, sin markdown de ningún tipo\n- Capítulos principales: 1. TITULO, 2. TITULO (mayúsculas)\n- Subcapítulos: 1.1 Subtítulo, 1.2 Subtítulo\n- Cada ítem en su propia línea\n- Entre 15 y 25 ítems en total`;
+    const raw = await callGemini(prompt);
+    S.indexSections = parseIndex(stripMD(raw));
+    S.generatedSections = {};
+    triggerSave();
+    renderIndex(); renderSections(); updateProgress();
+    document.getElementById('btn-gen-all').style.display = 'flex';
+    const ws2 = document.getElementById('welcome-state');
+    if (ws2) ws2.style.display = 'none';
+    toast('Índice generado. Podés editarlo antes de generar secciones.','success');
+  } catch(e) {
+    toast('Error: ' + e.message,'error');
+  } finally {
+    S.isGenerating = false; btn.disabled = false; btn.textContent = '⚡ Regenerar Índice';
+  }
+}
+
+function parseIndex(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  return lines.map(line => {
+    const sub = line.match(/^(\d+\.\d+)\s+(.+)/);
+    const main = line.match(/^(\d+)\.\s+(.+)/);
+    if (sub) return {num:sub[1], title:sub[2], level:2};
+    if (main) return {num:main[1], title:main[2], level:1};
+    if (line.length > 3) return {num:'', title:line, level:1};
+    return null;
+  }).filter(Boolean);
+}
+
+function renderIndex() {
+  const c = document.getElementById('sidebar-content');
+  c.innerHTML = S.indexSections.map((s,i) => {
+    const done = S.generatedSections[s.title];
+    return `<div class="idx-item ${s.level===2?'sub':''}" onclick="scrollToSection(${i})" id="idx-${i}">
+      <div class="idx-num">${s.num}</div>
+      <div class="idx-name">${s.title}</div>
+      <div class="idx-status ${done?'ok':''}">${done?'✓':''}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('idx-edit').value = S.indexSections.map(s=>`${s.num?s.num+'. ':''}${s.title}`).join('\n');
+}
+
+function renderSections() {
+  const area = document.getElementById('content-area');
+  const ws = document.getElementById('welcome-state');
+  if (ws) ws.style.display = 'none';
+  S.indexSections.forEach((s,i) => {
+    if (document.getElementById(`card-${i}`)) return;
+    const card = document.createElement('div');
+    card.className = 'section-card'; card.id = `card-${i}`;
+    const gen = S.generatedSections[s.title];
+    card.innerHTML = `
+      <div class="section-card-header" onclick="toggleCard(${i})">
+        <div class="section-card-title">${s.num?s.num+' — ':''}${s.title}</div>
+        <div class="section-card-actions" id="actions-${i}">
+          ${gen ? `<span class="word-count">${cWords(gen)} pal.</span>
+            <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();copiarSeccion(${i})">📋</button>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();regenSeccion(${i})">↺</button>`
+          : `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();generarSeccion(${i})">⚡ Generar</button>`}
+        </div>
+      </div>
+      <div class="section-card-body" id="body-${i}">
+        ${gen ? `<div class="section-text" id="text-${i}">${escHtml(gen)}</div>`
+              : `<button class="gen-btn-placeholder" onclick="generarSeccion(${i})">⚡ Clic para generar esta sección</button>`}
+      </div>`;
+    area.appendChild(card);
+  });
+  updateWordCount();
+}
+
+// ── GENERAR SECCIÓN ──
+async function generarSeccion(idx) {
+  if (S.isGenerating) { toast('Esperá la generación actual','info'); return; }
+  const sec = S.indexSections[idx]; if (!sec) return;
+  S.isGenerating = true;
+  updateSeccionUI(idx,'loading');
+  try {
+    const wc = WORD_COUNTS[S.config.extension] || 600;
+    const fullIdx = S.indexSections.map(s=>`${s.num?s.num+'. ':''}${s.title}`).join('\n');
+    const docCtx = S.config.doc_base_text ? `\n\nDOCUMENTO BASE:\n${S.config.doc_base_text}` : '';
+    const prevCtx = Object.entries(S.generatedSections).slice(-2)
+      .map(([k,v])=>`--- ${k} ---\n${v.substring(0,400)}`).join('\n\n');
+    const prompt = `Sos un metodólogo especializado en ${S.config.area_disciplinar}, redactando una ${S.config.tipo_trabajo} en ${S.config.idioma} con estilo de cita ${S.config.estilo_cita}.\n\nTÍTULO: ${S.config.titulo_tema}\nNIVEL: ${S.config.nivel_educativo}\n\nÍNDICE COMPLETO:\n${fullIdx}\n\n${S.config.contexto_adicional?`CONTEXTO: ${S.config.contexto_adicional}\n`:''}${prevCtx?`\nCONTEXTO PREVIO:\n${prevCtx}\n`:''}${docCtx}\n\nTAREA: Redactá la sección "${sec.num?sec.num+'. ':''}${sec.title}" con aproximadamente ${wc} palabras.\n\nINSTRUCCIONES ESTRICTAS:\n- Texto plano en ${S.config.idioma}, sin ningún markdown\n- Sin asteriscos, sin guiones de énfasis, sin #\n- Párrafos separados por línea en blanco\n- Tono académico para nivel ${S.config.nivel_educativo}`;
+    const raw = await callGemini(prompt);
+    const clean = stripMD(raw);
+    S.generatedSections[sec.title] = clean;
+    triggerSave();
+    updateSeccionUI(idx,'done',clean);
+    updateProgress(); updateWordCount();
+    toast(`"${sec.title}" generada`,'success');
+  } catch(e) {
+    updateSeccionUI(idx,'error',e.message);
+    toast('Error: ' + e.message,'error');
+  } finally { S.isGenerating = false; }
+}
+
+function updateSeccionUI(idx, state, text='') {
+  const sec = S.indexSections[idx];
+  const body = document.getElementById(`body-${idx}`);
+  const actions = document.getElementById(`actions-${idx}`);
+  const idxEl = document.getElementById(`idx-${idx}`);
+  if (!body) return;
+  if (state === 'loading') {
+    body.innerHTML = `<div class="gen-loading"><span style="font-family:var(--font-mono);font-size:.7rem">Generando ${sec.title}...</span><div class="loading-bar"><div class="loading-bar-inner"></div></div></div>`;
+    if (idxEl) { idxEl.querySelector('.idx-status').className='idx-status spin'; idxEl.querySelector('.idx-status').textContent='⏳'; }
+  }
+  if (state === 'done') {
+    body.innerHTML = `<div class="section-text" id="text-${idx}">${escHtml(text)}</div>`;
+    actions.innerHTML = `<span class="word-count">${cWords(text)} pal.</span>
+      <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();copiarSeccion(${idx})">📋</button>
+      <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();regenSeccion(${idx})">↺</button>`;
+    if (idxEl) { idxEl.querySelector('.idx-status').className='idx-status ok'; idxEl.querySelector('.idx-status').textContent='✓'; }
+    document.getElementById('btn-dl').disabled = false;
+  }
+  if (state === 'error') {
+    body.innerHTML = `<div style="padding:1rem;font-family:var(--font-mono);font-size:.7rem;color:var(--error)">Error: ${text}<br><br><button class="btn btn-sm btn-secondary" onclick="generarSeccion(${idx})">Reintentar</button></div>`;
+  }
+}
+
+async function generarTodo() {
+  if (S.isGenerating) return;
+  const pending = S.indexSections.map((s,i)=>({...s,idx:i})).filter(s=>!S.generatedSections[s.title]);
+  if (!pending.length) { toast('Todas las secciones ya están generadas','info'); return; }
+  toast(`Generando ${pending.length} secciones...`,'info');
+  for (const s of pending) { await generarSeccion(s.idx); await new Promise(r=>setTimeout(r,1500)); }
+  toast('¡Trabajo completo!','success');
+}
+
+async function regenSeccion(idx) {
+  const sec = S.indexSections[idx];
+  if (!confirm(`¿Regenerar "${sec.title}"?`)) return;
+  delete S.generatedSections[sec.title];
+  await generarSeccion(idx);
+}
+
+// ── ÍNDICE EDITABLE ──
+function toggleEditIdx() {
+  const edit = document.getElementById('idx-edit');
+  const content = document.getElementById('sidebar-content');
+  const controls = document.getElementById('edit-controls');
+  const btn = document.getElementById('btn-edit-idx');
+  const isEditing = edit.style.display === 'block';
+  if (isEditing) {
+    edit.style.display = 'none'; content.style.display = 'block';
+    controls.style.display = 'none'; btn.textContent = '✏ Editar';
+  } else {
+    edit.style.display = 'block'; content.style.display = 'none';
+    controls.style.display = 'block'; btn.textContent = '✕ Cancelar';
+  }
+}
+
+function aplicarEditIdx() {
+  const newSecs = parseIndex(document.getElementById('idx-edit').value);
+  if (!newSecs.length) { toast('Índice vacío','error'); return; }
+  const newTitles = new Set(newSecs.map(s=>s.title));
+  Object.keys(S.generatedSections).forEach(k=>{ if (!newTitles.has(k)) delete S.generatedSections[k]; });
+  S.indexSections = newSecs;
+  triggerSave();
+  document.getElementById('content-area').innerHTML = '';
+  renderIndex(); renderSections(); updateProgress();
+  toggleEditIdx();
+  toast('Índice actualizado','info');
+}
+
+// ── UTILIDADES ──
+function scrollToSection(idx) {
+  document.getElementById(`card-${idx}`)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.idx-item').forEach(s=>s.classList.remove('activo'));
+  document.getElementById(`idx-${idx}`)?.classList.add('activo');
+}
+
+function toggleCard(idx) { /* cards always open */ }
+
+function copiarSeccion(idx) {
+  const text = S.generatedSections[S.indexSections[idx].title] || '';
+  navigator.clipboard.writeText(text).then(()=>toast('Copiado','success'));
+}
+
+function descargarTxt() {
+  if (!Object.keys(S.generatedSections).length) { toast('Sin contenido para descargar','error'); return; }
+  let out = `${S.config.tipo_trabajo.toUpperCase()}\n${S.config.titulo_tema}\n${'─'.repeat(60)}\n`;
+  out += `Área: ${S.config.area_disciplinar}\nNivel: ${S.config.nivel_educativo}\nEstilo: ${S.config.estilo_cita}\n`;
+  out += `Generado: ${new Date().toLocaleDateString('es-AR')} — BRB Generador de Tesis\n${'═'.repeat(60)}\n\n`;
+  S.indexSections.forEach(s => {
+    const t = S.generatedSections[s.title];
+    if (t) out += `${'═'.repeat(60)}\n${s.num?s.num+'. ':''}${s.title}\n${'─'.repeat(60)}\n\n${t}\n\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([out],{type:'text/plain;charset=utf-8'}));
+  a.download = `tesis_${S.config.titulo_tema.substring(0,30).replace(/\s+/g,'_')}.txt`;
+  a.click(); toast('Descarga iniciada','success');
+}
+
+function updateProgress() {
+  const total = S.indexSections.length;
+  const done = S.indexSections.filter(s=>S.generatedSections[s.title]).length;
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = `${done}/${total} · ${pct}%`;
+}
+
+function updateWordCount() {
+  const total = Object.values(S.generatedSections).reduce((sum,t)=>sum+cWords(t),0);
+  document.getElementById('total-words').textContent = `${total.toLocaleString('es-AR')} palabras`;
+  if (total > 0) document.getElementById('btn-dl').disabled = false;
+}
+
+function cWords(t){ return t.trim().split(/\s+/).filter(Boolean).length; }
+function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast ${type} show`;
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+function irWizard() { mostrar('p-wizard'); }
+
+async function nuevaSesion() {
+  if (!confirm('¿Nueva sesión? Se perderá el trabajo actual.')) return;
+  if (S.perfilId) {
+    try { await supaFetch(`perfiles_tesis?id=eq.${S.perfilId}`, {method:'DELETE'}); } catch(e){}
+  }
+  S.indexSections = []; S.generatedSections = {}; S.perfilId = null;
+  S.config = {tipo_trabajo:'',titulo_tema:'',area_disciplinar:'',nivel_educativo:'',extension:'',estilo_cita:'',idioma:'español',contexto_adicional:'',doc_base_text:'',doc_base_name:''};
+  document.querySelectorAll('.card-opt').forEach(c=>c.classList.remove('sel'));
+  document.querySelector('[data-v="español"]')?.classList.add('sel');
+  document.getElementById('content-area').innerHTML = '<div class="welcome-state" id="welcome-state" style="opacity:1"><h2>Listo para<br><em>comenzar</em></h2><p>Hacé clic en <strong style="color:var(--oro)">Generar Índice</strong> para crear la estructura completa.</p><button class="btn btn-primary" onclick="generarIndice()">⚡ Generar Índice ahora</button></div>';
+  document.getElementById('sidebar-content').innerHTML = '<div class="index-ph"><div class="index-ph-icon">📋</div><div class="index-ph-text">El índice aparecerá<br>aquí tras generar<br>la estructura</div></div>';
+  for(let i=1;i<=4;i++){
+    document.getElementById(`ws-${i}`)?.classList.remove('activo','hecho');
+    document.getElementById(`wp-${i}`)?.classList.remove('activo');
+  }
+  document.getElementById('ws-1').classList.add('activo');
+  document.getElementById('wp-1').classList.add('activo');
+  mostrar('p-wizard');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (window['pdfjs-dist/build/pdf']) {
+    window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  // Enter en login
+  document.getElementById('li-clave').addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+  document.getElementById('li-email').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('li-clave').focus(); });
+
+  // Drag & drop
+  const zone = document.getElementById('upload-zone');
+  if (zone) {
+    zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('dragover');});
+    zone.addEventListener('dragleave', ()=>zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e=>{
+      e.preventDefault(); zone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) { const dt = new DataTransfer(); dt.items.add(file); zone.querySelector('input').files = dt.files; handleFile({target:{files:[file]}}); }
+    });
+  }
+
+  // Iniciar directo en login (sin auth SDK)
+  setTimeout(()=>mostrar('p-login'), 500);
+});
+</script>
+</body>
+</html>
